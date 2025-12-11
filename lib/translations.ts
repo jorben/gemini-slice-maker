@@ -147,7 +147,7 @@ export const translations = {
     uiLanguage: "界面语言",
     languageEn: "English",
     languageZh: "简体中文",
-    requestModeLabel: "请求类型",
+    requestModeLabel: "请求方式",
     requestModeClientDirect: "客户端直连",
     requestModeServerProxy: "服务端中转",
   },
