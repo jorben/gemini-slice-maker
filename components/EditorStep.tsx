@@ -72,28 +72,28 @@ export const EditorStep: React.FC<Props> = ({
   };
 
   return (
-    <div className="flex h-full bg-slate-100 overflow-hidden">
+    <div className="flex h-full bg-muted overflow-hidden">
       {/* Sidebar */}
-      <div className="w-64 bg-white border-r border-slate-200 flex flex-col h-full print:hidden">
+      <div className="w-64 bg-card border-r border-border flex flex-col h-full print:hidden">
         <div
-          className="p-4 border-b border-slate-100 cursor-pointer hover:bg-slate-50 transition-colors"
+          className="p-4 border-b border-border cursor-pointer hover:bg-muted transition-colors"
           onClick={() => setStep(AppStep.INPUT)}
         >
           <div className="flex items-center gap-2">
-            <div className="bg-indigo-600 p-1.5 rounded-lg">
-              <Layout className="w-5 h-5 text-white" />
+            <div className="bg-primary p-1.5 rounded-lg">
+              <Layout className="w-5 h-5 text-primary-foreground" />
             </div>
-            <span className="font-bold text-lg text-slate-900">
+            <span className="font-bold text-lg text-foreground">
               PPTMaker AI
             </span>
           </div>
         </div>
 
-        <div className="p-4 border-b border-slate-100">
-          <h3 className="font-bold text-slate-800 truncate">
+        <div className="p-4 border-b border-border">
+          <h3 className="font-bold text-foreground truncate">
             {presentation.title}
           </h3>
-          <p className="text-xs text-slate-500">
+          <p className="text-xs text-muted-foreground">
             {presentation.slides.length} {t.slidesLabel}
           </p>
         </div>
@@ -104,23 +104,23 @@ export const EditorStep: React.FC<Props> = ({
               onClick={() => setActiveSlideIndex(idx)}
               className={`p-2 rounded-lg cursor-pointer border-2 transition-all group ${
                 idx === activeSlideIndex
-                  ? "border-indigo-600 bg-indigo-50"
-                  : "border-transparent hover:bg-slate-50"
+                  ? "border-primary bg-primary/10"
+                  : "border-transparent hover:bg-muted"
               }`}
             >
               <div className="flex justify-between items-center mb-1">
-                <span className="text-xs font-bold text-slate-400">
+                <span className="text-xs font-bold text-muted-foreground">
                   #{slide.pageNumber}
                 </span>
                 {slide.status === "completed" ? (
-                  <div className="w-2 h-2 rounded-full bg-green-500" />
+                  <div className="w-2 h-2 rounded-full bg-success" />
                 ) : slide.status === "failed" ? (
-                  <div className="w-2 h-2 rounded-full bg-red-500" />
+                  <div className="w-2 h-2 rounded-full bg-destructive" />
                 ) : (
-                  <div className="w-2 h-2 rounded-full bg-yellow-500 animate-pulse" />
+                  <div className="w-2 h-2 rounded-full bg-warning animate-pulse" />
                 )}
               </div>
-              <div className="aspect-video bg-slate-200 rounded overflow-hidden relative">
+              <div className="aspect-video bg-muted rounded overflow-hidden relative">
                 {slide.imageUrl ? (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img
@@ -130,20 +130,20 @@ export const EditorStep: React.FC<Props> = ({
                   />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center">
-                    <ImageIcon className="w-6 h-6 text-slate-400" />
+                    <ImageIcon className="w-6 h-6 text-muted-foreground" />
                   </div>
                 )}
               </div>
-              <p className="text-xs text-slate-700 mt-2 truncate font-medium">
+              <p className="text-xs text-foreground mt-2 truncate font-medium">
                 {slide.content.title}
               </p>
             </div>
           ))}
         </div>
-        <div className="p-4 border-t border-slate-200">
+        <div className="p-4 border-t border-border">
           <button
             onClick={downloadPDF}
-            className="w-full py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg flex items-center justify-center gap-2 text-sm font-medium transition-colors shadow-sm"
+            className="w-full py-2 bg-primary hover:bg-primary/90 text-primary-foreground rounded-lg flex items-center justify-center gap-2 text-sm font-medium transition-colors shadow-sm"
           >
             <Download className="w-4 h-4" /> {t.exportPdf}
           </button>
@@ -153,14 +153,14 @@ export const EditorStep: React.FC<Props> = ({
       {/* Main Content */}
       <div className="flex-1 flex flex-col h-full overflow-hidden">
         {/* Toolbar */}
-        <div className="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-6 print:hidden">
+        <div className="h-16 bg-card border-b border-border flex items-center justify-between px-6 print:hidden">
           <div className="flex items-center gap-4">
             <button
               onClick={() =>
                 setActiveSlideIndex(Math.max(0, activeSlideIndex - 1))
               }
               disabled={activeSlideIndex === 0}
-              className="p-2 rounded hover:bg-slate-100 disabled:opacity-50"
+              className="p-2 rounded hover:bg-muted disabled:opacity-50"
             >
               <ChevronLeft className="w-5 h-5" />
             </button>
@@ -175,7 +175,7 @@ export const EditorStep: React.FC<Props> = ({
                 )
               }
               disabled={activeSlideIndex === presentation.slides.length - 1}
-              className="p-2 rounded hover:bg-slate-100 disabled:opacity-50"
+              className="p-2 rounded hover:bg-muted disabled:opacity-50"
             >
               <ChevronRight className="w-5 h-5" />
             </button>
@@ -184,7 +184,7 @@ export const EditorStep: React.FC<Props> = ({
             <button
               onClick={() => regenerateSlide(activeSlideIndex)}
               disabled={activeSlide.status === "generating"}
-              className="px-4 py-2 text-indigo-600 bg-indigo-50 hover:bg-indigo-100 rounded-lg text-sm font-medium flex items-center gap-2 transition-colors disabled:opacity-50"
+              className="px-4 py-2 text-primary bg-primary/10 hover:bg-primary/20 rounded-lg text-sm font-medium flex items-center gap-2 transition-colors disabled:opacity-50"
             >
               <RefreshCw
                 className={`w-4 h-4 ${
@@ -197,8 +197,8 @@ export const EditorStep: React.FC<Props> = ({
         </div>
 
         {/* Canvas */}
-        <div className="flex-1 overflow-y-auto p-8 flex items-center justify-center bg-slate-100 print:hidden">
-          <div className="w-full max-w-5xl aspect-[16/9] bg-white shadow-2xl rounded-lg overflow-hidden relative">
+        <div className="flex-1 overflow-y-auto p-8 flex items-center justify-center bg-muted print:hidden">
+          <div className="w-full max-w-5xl aspect-[16/9] bg-card shadow-2xl rounded-lg overflow-hidden relative">
             {activeSlide.imageUrl ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img
@@ -207,15 +207,15 @@ export const EditorStep: React.FC<Props> = ({
                 className="w-full h-full object-contain"
               />
             ) : (
-              <div className="w-full h-full flex items-center justify-center bg-slate-100">
-                <ImageIcon className="w-16 h-16 text-slate-300" />
+              <div className="w-full h-full flex items-center justify-center bg-muted">
+                <ImageIcon className="w-16 h-16 text-muted-foreground/50" />
               </div>
             )}
 
             {activeSlide.status === "generating" && (
-              <div className="absolute inset-0 bg-white/80 z-20 flex flex-col items-center justify-center">
-                <div className="w-12 h-12 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin mb-4"></div>
-                <p className="text-indigo-900 font-medium">{t.designing}</p>
+              <div className="absolute inset-0 bg-card/80 z-20 flex flex-col items-center justify-center">
+                <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin mb-4"></div>
+                <p className="text-primary font-medium">{t.designing}</p>
               </div>
             )}
           </div>
@@ -233,7 +233,7 @@ export const EditorStep: React.FC<Props> = ({
                   alt={`Slide ${s.pageNumber}`}
                 />
               ) : (
-                <div className="text-gray-400 text-2xl">
+                <div className="text-muted-foreground text-2xl">
                   Slide {s.pageNumber}
                 </div>
               )}
@@ -242,9 +242,9 @@ export const EditorStep: React.FC<Props> = ({
         </div>
 
         {/* Editor Panel */}
-        <div className="h-48 bg-white border-t border-slate-200 p-6 flex gap-6 overflow-hidden print:hidden">
+        <div className="h-48 bg-card border-t border-border p-6 flex gap-6 overflow-hidden print:hidden">
           <div className="flex-1 flex flex-col">
-            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 flex items-center gap-2">
+            <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-2 flex items-center gap-2">
               <Edit3 className="w-3 h-3" /> {t.editorTitle}
             </label>
             <input
@@ -255,11 +255,11 @@ export const EditorStep: React.FC<Props> = ({
                 newSlides[activeSlideIndex].content.title = e.target.value;
                 setPresentation({ ...presentation, slides: newSlides });
               }}
-              className="w-full p-2 border border-slate-200 rounded focus:border-indigo-500 font-bold text-lg"
+              className="w-full p-2 border border-border rounded focus:border-primary font-bold text-lg"
             />
           </div>
           <div className="flex-[2] flex flex-col">
-            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 flex items-center gap-2">
+            <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-2 flex items-center gap-2">
               <Layout className="w-3 h-3" /> {t.editorBullets}
             </label>
             <textarea
@@ -270,11 +270,11 @@ export const EditorStep: React.FC<Props> = ({
                   e.target.value.split("\n");
                 setPresentation({ ...presentation, slides: newSlides });
               }}
-              className="w-full flex-1 p-2 border border-slate-200 rounded focus:border-indigo-500 resize-none font-medium"
+              className="w-full flex-1 p-2 border border-border rounded focus:border-primary resize-none font-medium"
             />
           </div>
           <div className="flex-1 flex flex-col">
-            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 flex items-center gap-2">
+            <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-2 flex items-center gap-2">
               <Settings className="w-3 h-3" /> {t.editorPrompt}
             </label>
             <textarea
@@ -285,7 +285,7 @@ export const EditorStep: React.FC<Props> = ({
                   e.target.value;
                 setPresentation({ ...presentation, slides: newSlides });
               }}
-              className="w-full flex-1 p-2 border border-slate-200 rounded focus:border-indigo-500 resize-none text-xs text-slate-600 bg-slate-50"
+              className="w-full flex-1 p-2 border border-border rounded focus:border-primary resize-none text-xs text-muted-foreground bg-muted"
             />
           </div>
         </div>

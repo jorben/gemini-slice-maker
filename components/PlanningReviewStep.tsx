@@ -119,16 +119,16 @@ export const PlanningReviewStep: React.FC<Props> = ({
         <div>
             <button 
                 onClick={() => setStep(AppStep.CONFIG)}
-                className="text-slate-500 hover:text-slate-800 mb-2 flex items-center gap-1"
+                className="text-muted-foreground hover:text-foreground mb-2 flex items-center gap-1"
             >
                 <ChevronLeft className="w-4 h-4" /> {t.backToConfig}
             </button>
-            <h2 className="text-3xl font-bold text-slate-900">{t.reviewTitle}</h2>
-            <p className="text-slate-500 mt-1">{t.reviewSubtitle}</p>
+            <h2 className="text-3xl font-bold text-foreground">{t.reviewTitle}</h2>
+            <p className="text-muted-foreground mt-1">{t.reviewSubtitle}</p>
         </div>
         <button
             onClick={startImageGeneration}
-            className="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2.5 px-6 rounded-lg transition-all shadow-md hover:shadow-lg flex items-center gap-2"
+            className="bg-primary hover:bg-primary/90 text-primary-foreground font-semibold py-2.5 px-6 rounded-lg transition-all shadow-md hover:shadow-lg flex items-center gap-2"
         >
             <Play className="w-4 h-4" /> {t.confirmAndGenerate}
         </button>
@@ -136,11 +136,11 @@ export const PlanningReviewStep: React.FC<Props> = ({
 
       <div className="space-y-6">
         {presentation.slides.map((slide, index) => (
-            <div key={slide.id} className="bg-white rounded-xl border border-slate-200 shadow-sm p-6 relative group">
+            <div key={slide.id} className="bg-card rounded-xl border border-border shadow-sm p-6 relative group">
                 <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity">
                      <button 
                         onClick={() => handleRemoveSlide(index)}
-                        className="p-2 text-slate-400 hover:text-red-500 transition-colors"
+                        className="p-2 text-muted-foreground hover:text-destructive transition-colors"
                         title={t.removeSlide}
                     >
                         <Trash2 className="w-4 h-4" />
@@ -148,41 +148,41 @@ export const PlanningReviewStep: React.FC<Props> = ({
                 </div>
                 
                 <div className="flex gap-4">
-                    <div className="flex-shrink-0 w-8 h-8 bg-indigo-100 text-indigo-700 rounded-full flex items-center justify-center font-bold text-sm mt-1">
+                    <div className="flex-shrink-0 w-8 h-8 bg-primary/20 text-primary rounded-full flex items-center justify-center font-bold text-sm mt-1">
                         {slide.pageNumber}
                     </div>
                     <div className="flex-grow space-y-4">
                         <div>
-                            <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">
+                            <label className="block text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1">
                                 {t.slideTitle}
                             </label>
                             <input 
                                 type="text"
                                 value={slide.content.title}
                                 onChange={(e) => handleUpdateSlide(index, 'title', e.target.value)}
-                                className="w-full text-lg font-bold text-slate-900 border-b border-transparent hover:border-slate-300 focus:border-indigo-500 focus:outline-none transition-colors py-1"
+                                className="w-full text-lg font-bold text-foreground border-b border-transparent hover:border-input focus:border-primary focus:outline-none transition-colors py-1"
                             />
                         </div>
 
                         <div>
-                            <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">
+                            <label className="block text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1">
                                 {t.bulletPoints}
                             </label>
                             <textarea
                                 value={slide.content.bulletPoints.join('\n')}
                                 onChange={(e) => handleUpdateSlide(index, 'bulletPoints', e.target.value.split('\n'))}
-                                className="w-full text-sm text-slate-700 border rounded-md border-slate-200 p-2 focus:border-indigo-500 focus:outline-none min-h-[100px]"
+                                className="w-full text-sm text-foreground border rounded-md border-border p-2 focus:border-primary focus:outline-none min-h-[100px]"
                             />
                         </div>
 
                         <div>
-                            <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">
+                            <label className="block text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1">
                                 {t.visualDesc}
                             </label>
                             <textarea
                                 value={slide.content.visualDescription}
                                 onChange={(e) => handleUpdateSlide(index, 'visualDescription', e.target.value)}
-                                className="w-full text-sm text-slate-600 italic bg-slate-50 border border-slate-200 rounded-md p-2 focus:border-indigo-500 focus:outline-none min-h-[60px]"
+                                className="w-full text-sm text-muted-foreground italic bg-muted border border-border rounded-md p-2 focus:border-primary focus:outline-none min-h-[60px]"
                             />
                         </div>
                     </div>
@@ -192,7 +192,7 @@ export const PlanningReviewStep: React.FC<Props> = ({
 
         <button
             onClick={handleAddSlide}
-            className="w-full py-4 border-2 border-dashed border-slate-300 rounded-xl text-slate-500 hover:border-indigo-400 hover:text-indigo-600 transition-all flex items-center justify-center gap-2 font-medium"
+            className="w-full py-4 border-2 border-dashed border-input rounded-xl text-muted-foreground hover:border-primary hover:text-primary transition-all flex items-center justify-center gap-2 font-medium"
         >
             <Plus className="w-5 h-5" /> {t.addSlide}
         </button>

@@ -62,19 +62,19 @@ export default function HomePage() {
       )}
 
       {step !== AppStep.EDITOR && step !== AppStep.API_KEY_CHECK && (
-        <header className="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-6">
+        <header className="h-16 bg-card border-b border-border flex items-center justify-between px-6">
           <div className="flex items-center gap-2">
-            <div className="bg-indigo-600 p-1.5 rounded-lg">
-              <Layout className="w-5 h-5 text-white" />
+            <div className="bg-primary p-1.5 rounded-lg">
+              <Layout className="w-5 h-5 text-primary-foreground" />
             </div>
-            <span className="font-bold text-xl text-slate-900">
+            <span className="font-bold text-xl text-foreground">
               PPTMaker AI
             </span>
           </div>
           <div className="flex items-center gap-2">
             <button
               onClick={() => setShowApiModal(true)}
-              className="flex items-center gap-1.5 text-sm font-medium text-slate-600 hover:text-indigo-600 transition-colors px-3 py-1.5 rounded-full hover:bg-slate-100"
+              className="flex items-center gap-1.5 text-sm font-medium text-muted-foreground hover:text-primary transition-colors px-3 py-1.5 rounded-full hover:bg-muted"
               title={t.configureApiKey}
             >
               <Settings className="w-4 h-4" />
@@ -82,7 +82,7 @@ export default function HomePage() {
             </button>
             <button
               onClick={toggleLanguage}
-              className="flex items-center gap-1.5 text-sm font-medium text-slate-600 hover:text-indigo-600 transition-colors px-3 py-1.5 rounded-full hover:bg-slate-100"
+              className="flex items-center gap-1.5 text-sm font-medium text-muted-foreground hover:text-primary transition-colors px-3 py-1.5 rounded-full hover:bg-muted"
             >
               <Languages className="w-4 h-4" />
               {uiLanguage === "en" ? "中文" : "English"}
@@ -91,7 +91,7 @@ export default function HomePage() {
         </header>
       )}
 
-      <main className="flex-1 bg-slate-50 overflow-y-auto relative">
+      <main className="flex-1 bg-muted overflow-y-auto relative">
         {step === AppStep.INPUT && (
           <InputStep
             inputSource={inputSource}

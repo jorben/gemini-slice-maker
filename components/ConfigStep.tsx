@@ -97,16 +97,16 @@ export const ConfigStep: React.FC<Props> = ({
     <div className="max-w-4xl mx-auto w-full p-6 animate-fade-in">
       <button 
         onClick={() => setStep(AppStep.INPUT)}
-        className="text-slate-500 hover:text-slate-800 mb-6 flex items-center gap-1"
+        className="text-muted-foreground hover:text-foreground mb-6 flex items-center gap-1"
       >
         <ChevronLeft className="w-4 h-4" /> {t.backBtn}
       </button>
 
-      <h2 className="text-3xl font-bold text-slate-900 mb-8">{t.settingsTitle}</h2>
+      <h2 className="text-3xl font-bold text-foreground mb-8">{t.settingsTitle}</h2>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
         <div className="col-span-2">
-          <label className="block text-sm font-medium text-slate-700 mb-3">{t.visualStyle}</label>
+          <label className="block text-sm font-medium text-foreground mb-3">{t.visualStyle}</label>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {[
               { id: SlideStyle.MINIMAL, ...t.styles.minimal },
@@ -118,14 +118,14 @@ export const ConfigStep: React.FC<Props> = ({
                 onClick={() => setConfig({...config, style: styleOption.id as SlideStyle})}
                 className={`cursor-pointer border-2 rounded-xl p-4 transition-all ${
                   config.style === styleOption.id 
-                  ? 'border-indigo-600 bg-indigo-50' 
-                  : 'border-slate-200 hover:border-indigo-300'
+                  ? 'border-primary bg-primary/10' 
+                  : 'border-border hover:border-primary/50'
                 }`}
               >
-                <h3 className={`font-bold ${config.style === styleOption.id ? 'text-indigo-900' : 'text-slate-700'}`}>
+                <h3 className={`font-bold ${config.style === styleOption.id ? 'text-primary' : 'text-foreground'}`}>
                   {styleOption.title}
                 </h3>
-                <p className="text-sm text-slate-500 mt-1">{styleOption.desc}</p>
+                <p className="text-sm text-muted-foreground mt-1">{styleOption.desc}</p>
               </div>
             ))}
           </div>
@@ -135,7 +135,7 @@ export const ConfigStep: React.FC<Props> = ({
               <input
                 type="text"
                 placeholder={t.customPlaceholder}
-                className="w-full p-3 border border-slate-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500"
+                className="w-full p-3 border border-input rounded-lg focus:ring-ring focus:border-primary"
                 value={config.customStyleDescription || ''}
                 onChange={(e) => setConfig({...config, customStyleDescription: e.target.value})}
               />
@@ -145,23 +145,23 @@ export const ConfigStep: React.FC<Props> = ({
 
         <div className="col-span-2 grid grid-cols-1 md:grid-cols-2 gap-8">
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-2">{t.approxSlides}</label>
+            <label className="block text-sm font-medium text-foreground mb-2">{t.approxSlides}</label>
             <input 
               type="number" 
               min={1} 
               max={40}
               value={config.pageCount}
               onChange={(e) => setConfig({...config, pageCount: parseInt(e.target.value) || 5})}
-              className="w-full p-3 border border-slate-300 rounded-lg"
+              className="w-full p-3 border border-input rounded-lg"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-2">{t.outputLang}</label>
+            <label className="block text-sm font-medium text-foreground mb-2">{t.outputLang}</label>
             <select 
               value={config.language}
               onChange={(e) => setConfig({...config, language: e.target.value as 'English' | 'Chinese'})}
-              className="w-full p-3 border border-slate-300 rounded-lg bg-white"
+              className="w-full p-3 border border-input rounded-lg bg-background"
             >
               <option value="English">English</option>
               <option value="Chinese">Simplified Chinese (简体中文)</option>
@@ -170,10 +170,10 @@ export const ConfigStep: React.FC<Props> = ({
         </div>
 
         <div className="col-span-2">
-          <label className="block text-sm font-medium text-slate-700 mb-2">{t.additionalReqLabel}</label>
+          <label className="block text-sm font-medium text-foreground mb-2">{t.additionalReqLabel}</label>
           <textarea
             placeholder={t.additionalReqPlaceholder}
-            className="w-full p-3 border border-slate-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500 h-24 resize-none"
+            className="w-full p-3 border border-input rounded-lg focus:ring-ring focus:border-primary h-24 resize-none"
             value={config.additionalPrompt || ''}
             onChange={(e) => setConfig({...config, additionalPrompt: e.target.value})}
           />
@@ -183,7 +183,7 @@ export const ConfigStep: React.FC<Props> = ({
       <div className="flex justify-center">
         <button
           onClick={startGeneration}
-          className="bg-indigo-600 hover:bg-indigo-700 text-white text-lg font-semibold py-3 px-12 rounded-full transition-all shadow-lg hover:shadow-xl flex items-center gap-2"
+          className="bg-primary hover:bg-primary/90 text-primary-foreground text-lg font-semibold py-3 px-12 rounded-full transition-all shadow-lg hover:shadow-xl flex items-center gap-2"
         >
           <Wand2 className="w-5 h-5" /> {t.generateBtn}
         </button>
