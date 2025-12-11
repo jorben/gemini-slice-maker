@@ -4,41 +4,95 @@
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    /* 基础背景与前景 - 采用 Zinc 色系，更显现代冷淡风 */
+    --background: oklch(1 0 0);
+    --foreground: oklch(0.145 0.005 285.8);
+
+    /* 卡片 - 纯白背景，深色文字 */
+    --card: oklch(1 0 0);
+    --card-foreground: oklch(0.145 0.005 285.8);
+
+    /* 弹出层 */
+    --popover: oklch(1 0 0);
+    --popover-foreground: oklch(0.145 0.005 285.8);
+
+    /* 主色 - 优雅的 Indigo/Violet (Gemini 风格) */
+    /* 比之前的更深沉，更有质感 */
+    --primary: oklch(0.5 0.24 280);
+    --primary-foreground: oklch(0.985 0 0);
+
+    /* 次要色 - 浅灰背景 */
+    --secondary: oklch(0.97 0.001 286);
+    --secondary-foreground: oklch(0.205 0.006 286);
+
+    /* 静音色 - 用于次要文本 */
+    --muted: oklch(0.97 0.001 286);
+    --muted-foreground: oklch(0.556 0.016 286);
+
+    /* 强调色 - 用于 Hover 等交互 */
+    --accent: oklch(0.97 0.001 286);
+    --accent-foreground: oklch(0.205 0.006 286);
+
+    /* 破坏性操作 - 红色 */
+    --destructive: oklch(0.637 0.237 25.331);
+    --destructive-foreground: oklch(0.985 0 0);
+
+    /* 成功状态 - 翠绿色 */
+    --success: oklch(0.627 0.194 149.214);
+    --success-foreground: oklch(0.985 0 0);
+
+    /* 警告状态 - 琥珀色 */
+    --warning: oklch(0.795 0.184 86.047);
+    --warning-foreground: oklch(0.205 0.006 286);
+
+    /* 边框与输入框 */
+    --border: oklch(0.922 0.004 286);
+    --input: oklch(0.922 0.004 286);
     
-    --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    /* 聚焦环 - 与主色一致 */
+    --ring: oklch(0.5 0.24 280);
+
+    /* 圆角 - 稍微增大以增加现代感 */
+    --radius: 0.75rem;
+  }
+
+  /* 暗黑模式支持 */
+  .dark {
+    --background: oklch(0.1 0.005 286);
+    --foreground: oklch(0.985 0 0);
+
+    --card: oklch(0.1 0.005 286);
+    --card-foreground: oklch(0.985 0 0);
+
+    --popover: oklch(0.1 0.005 286);
+    --popover-foreground: oklch(0.985 0 0);
+
+    /* Dark Mode 主色稍微调亮 */
+    --primary: oklch(0.6 0.24 280);
+    --primary-foreground: oklch(0.985 0 0);
+
+    --secondary: oklch(0.2 0.006 286);
+    --secondary-foreground: oklch(0.985 0 0);
+
+    --muted: oklch(0.2 0.006 286);
+    --muted-foreground: oklch(0.65 0.016 286);
+
+    --accent: oklch(0.2 0.006 286);
+    --accent-foreground: oklch(0.985 0 0);
+
+    --destructive: oklch(0.396 0.141 25.723);
+    --destructive-foreground: oklch(0.985 0 0);
     
-    --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
+    --success: oklch(0.4 0.15 150);
+    --success-foreground: oklch(0.985 0 0);
     
-    --primary: 238.7 83.5% 66.7%;
-    --primary-foreground: 210 40% 98%;
+    --warning: oklch(0.5 0.15 85);
+    --warning-foreground: oklch(0.985 0 0);
+
+    --border: oklch(0.2 0.006 286);
+    --input: oklch(0.2 0.006 286);
     
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
-    
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
-    
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
-    
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
-    
-    --success: 142.1 76.2% 36.3%;
-    --success-foreground: 355.7 100% 97.3%;
-    
-    --warning: 45.4 93.4% 47.5%;
-    --warning-foreground: 26 83.3% 14.1%;
-    
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 238.7 83.5% 66.7%;
-    
-    --radius: 0.5rem;
+    --ring: oklch(0.6 0.24 280);
   }
 }
 

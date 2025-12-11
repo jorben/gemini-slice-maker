@@ -53,7 +53,8 @@ export const translations = {
     generatingHint: "Task in progress, please do not close the page",
     checkingApi: "Checking API configuration...",
     configureApiKey: "Configure API",
-    vertexConfigRequired: "Configure your API to start generating presentations.",
+    vertexConfigRequired:
+      "Configure your API to start generating presentations. Configuration is stored locally in your browser.",
     apiKeyLabel: "API Key",
     apiBaseLabel: "API Base URL",
     contentModelLabel: "Content Model ID",
@@ -65,7 +66,6 @@ export const translations = {
     errorContentModelRequired: "Content Model ID is required",
     errorImageModelRequired: "Image Model ID is required",
     errorFailed: "Failed to save configuration",
-    configStoredLocally: "Configuration is stored locally in your browser.",
     // 新增翻译
     apiProtocolLabel: "API Protocol",
     protocolVertexAI: "Google VertexAI Compatible",
@@ -73,6 +73,9 @@ export const translations = {
     uiLanguage: "Interface Language",
     languageEn: "English",
     languageZh: "简体中文",
+    requestModeLabel: "Request Mode",
+    requestModeClientDirect: "Client Direct",
+    requestModeServerProxy: "Server Proxy",
   },
   zh: {
     appTitle: "PPTMaker AI",
@@ -122,7 +125,8 @@ export const translations = {
     generatingHint: "任务进行中，请勿关闭页面",
     checkingApi: "正在检查 API 配置...",
     configureApiKey: "配置 API",
-    vertexConfigRequired: "配置您的 API 以开始生成演示文稿。",
+    vertexConfigRequired:
+      "配置您的 API 以开始生成演示文稿，配置只存储在浏览器本地。",
     apiKeyLabel: "API 密钥",
     apiBaseLabel: "API 基础 URL",
     contentModelLabel: "内容模型 ID",
@@ -134,7 +138,6 @@ export const translations = {
     errorContentModelRequired: "请输入内容模型 ID",
     errorImageModelRequired: "请输入图片模型 ID",
     errorFailed: "保存配置失败",
-    configStoredLocally: "配置存储在浏览器本地。",
     // 新增翻译
     apiProtocolLabel: "API 协议",
     protocolVertexAI: "Google VertexAI 兼容",
@@ -142,5 +145,8 @@ export const translations = {
     uiLanguage: "界面语言",
     languageEn: "English",
     languageZh: "简体中文",
+    requestModeLabel: "请求类型",
+    requestModeClientDirect: "客户端直连",
+    requestModeServerProxy: "服务端中转",
   },
 };

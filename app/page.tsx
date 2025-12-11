@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Layout, Languages, Settings } from "lucide-react";
 import { AppStep } from "@/lib/types";
 import type {
@@ -40,10 +40,22 @@ export default function HomePage() {
   const [streamingContent, setStreamingContent] = useState("");
   const [showApiModal, setShowApiModal] = useState(false);
 
+  useEffect(() => {
+    const savedLang = localStorage.getItem("ppt-maker-lang") as Language;
+    if (savedLang && (savedLang === "en" || savedLang === "zh")) {
+      setUiLanguage(savedLang);
+    }
+  }, []);
+
+  const handleLanguageChange = (lang: Language) => {
+    setUiLanguage(lang);
+    localStorage.setItem("ppt-maker-lang", lang);
+  };
+
   const t = translations[uiLanguage];
 
   const toggleLanguage = () => {
-    setUiLanguage((prev) => (prev === "en" ? "zh" : "en"));
+    handleLanguageChange(uiLanguage === "en" ? "zh" : "en");
   };
 
   const handleKeyConfigured = () => {
@@ -57,7 +69,7 @@ export default function HomePage() {
           onKeyConfigured={handleKeyConfigured} 
           t={t} 
           uiLanguage={uiLanguage}
-          onLanguageChange={setUiLanguage}
+          onLanguageChange={handleLanguageChange}
         />
       )}
 
@@ -156,7 +168,7 @@ export default function HomePage() {
           onCancel={() => setShowApiModal(false)}
           t={t}
           uiLanguage={uiLanguage}
-          onLanguageChange={setUiLanguage}
+          onLanguageChange={handleLanguageChange}
           forceEdit={true}
         />
       )}

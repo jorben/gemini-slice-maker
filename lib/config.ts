@@ -6,8 +6,15 @@ export enum ApiProtocol {
   OPENAI = 'openai',
 }
 
+// 请求模式
+export enum RequestMode {
+  CLIENT_DIRECT = 'client_direct',
+  SERVER_PROXY = 'server_proxy',
+}
+
 export interface ApiConfig {
   protocol: ApiProtocol;
+  requestMode: RequestMode;
   apiKey: string;
   apiBase: string;
   contentModelId: string;
@@ -49,6 +56,7 @@ export function isApiConfigured(): boolean {
   
   return !!(
     config.protocol &&
+    config.requestMode &&
     config.apiKey &&
     config.apiBase &&
     config.contentModelId &&

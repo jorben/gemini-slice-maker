@@ -61,8 +61,8 @@ export const LoadingStep: React.FC<Props> = ({ step, presentation, generationPro
     const totalCount = presentation.slides.length;
     
     return (
-      <div className="flex flex-col h-full max-w-3xl mx-auto p-6 animate-fade-in w-full">
-        <div className="text-center mb-6">
+      <div className="flex flex-col max-w-3xl mx-auto p-6 animate-fade-in w-full min-h-[80vh]">
+        <div className="text-center mb-6 sticky top-0 z-10 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 py-4 border-b border-border/50">
           <h2 className="text-2xl font-bold text-foreground mb-2">{t.loadingGenerating}</h2>
           <div className="w-full max-w-md mx-auto">
             <ProgressBar 
@@ -73,46 +73,55 @@ export const LoadingStep: React.FC<Props> = ({ step, presentation, generationPro
           </div>
         </div>
 
-        <div className="flex-1 overflow-hidden flex flex-col bg-card rounded-xl border border-border shadow-sm relative">
-          <div ref={progressListRef} className="flex-1 overflow-y-auto p-2 scroll-smooth">
+        <div className="flex flex-col relative bg-transparent space-y-3 pb-20">
             {presentation.slides.map((slide) => (
               <div 
                 key={slide.id} 
-                className={`p-4 flex items-center gap-4 border-b border-muted last:border-0 rounded-lg transition-colors ${
-                  slide.status === 'generating' ? 'bg-primary/10' : 'hover:bg-muted'
+                className={`p-4 flex items-center gap-4 rounded-xl border transition-all duration-300 ${
+                  slide.status === 'generating' 
+                    ? 'bg-primary/5 border-primary/20 shadow-[0_0_15px_rgba(var(--primary),0.1)]' 
+                    : slide.status === 'completed' 
+                      ? 'bg-card border-border/40' 
+                      : 'bg-card/50 border-transparent opacity-60'
                 }`}
               >
-                <div className={`flex-shrink-0 w-8 h-8 flex items-center justify-center rounded-full font-bold text-sm ${
-                  slide.status === 'completed' ? 'bg-success/20 text-success' : 
-                  slide.status === 'generating' ? 'bg-primary/20 text-primary' :
-                  slide.status === 'failed' ? 'bg-destructive/20 text-destructive' :
-                  'bg-muted text-muted-foreground'
+                <div className={`flex-shrink-0 w-10 h-10 flex items-center justify-center rounded-full font-bold text-sm border shadow-sm ${
+                  slide.status === 'completed' ? 'bg-success/10 border-success/30 text-success' : 
+                  slide.status === 'generating' ? 'bg-primary/10 border-primary/30 text-primary animate-pulse' :
+                  slide.status === 'failed' ? 'bg-destructive/10 border-destructive/30 text-destructive' :
+                  'bg-muted/50 border-border text-muted-foreground'
                 }`}>
                   {slide.pageNumber}
                 </div>
                 
                 <div className="flex-1 min-w-0">
-                  <p className={`text-sm font-medium truncate ${
+                  <p className={`text-base font-semibold truncate mb-1 ${
                     slide.status === 'completed' ? 'text-foreground' : 
                     slide.status === 'generating' ? 'text-primary' : 'text-muted-foreground'
                   }`}>
                     {slide.content.title || `Slide ${slide.pageNumber}`}
                   </p>
-                  <p className="text-xs text-muted-foreground truncate">
-                    {slide.status === 'generating' ? t.designing : slide.content.visualDescription}
+                  <p className="text-xs text-muted-foreground/80 truncate font-mono">
+                    {slide.status === 'generating' ? (
+                        <span className="flex items-center gap-2">
+                             {t.designing} <span className="animate-pulse">...</span>
+                        </span>
+                    ) : slide.content.visualDescription}
                   </p>
                 </div>
 
-                <div className="flex-shrink-0">
-                  {slide.status === 'pending' && <Clock className="w-5 h-5 text-muted-foreground/50" />}
+                <div className={`flex-shrink-0 w-10 h-10 flex items-center justify-center rounded-full ${
+                     slide.status === 'generating' ? 'bg-primary/10' : 
+                     slide.status === 'completed' ? 'bg-success/10' : 
+                     'bg-transparent'
+                }`}>
+                  {slide.status === 'pending' && <Clock className="w-5 h-5 text-muted-foreground/30" />}
                   {slide.status === 'generating' && <Loader2 className="w-5 h-5 text-primary animate-spin" />}
                   {slide.status === 'completed' && <CheckCircle className="w-5 h-5 text-success" />}
                   {slide.status === 'failed' && <AlertCircle className="w-5 h-5 text-destructive" />}
                 </div>
               </div>
             ))}
-          </div>
-          <div className="absolute bottom-0 left-0 right-0 h-8 bg-gradient-to-t from-card to-transparent pointer-events-none"></div>
         </div>
       </div>
     );

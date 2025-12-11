@@ -1,9 +1,16 @@
-'use client';
+"use client";
 
-import React, { useEffect, useState } from 'react';
-import { Key, Loader2, AlertCircle, Languages, X } from 'lucide-react';
-import { translations, Language } from '@/lib/translations';
-import { getApiConfig, saveApiConfig, isApiConfigured, ApiConfig, ApiProtocol } from '@/lib/config';
+import React, { useEffect, useState } from "react";
+import { Key, Loader2, AlertCircle, Languages, X } from "lucide-react";
+import { translations, Language } from "@/lib/translations";
+import {
+  getApiConfig,
+  saveApiConfig,
+  isApiConfigured,
+  ApiConfig,
+  ApiProtocol,
+  RequestMode,
+} from "@/lib/config";
 
 type Translation = typeof translations.en;
 
@@ -16,23 +23,24 @@ interface Props {
   forceEdit?: boolean;
 }
 
-export const ApiKeyModal: React.FC<Props> = ({ 
-  onKeyConfigured, 
+export const ApiKeyModal: React.FC<Props> = ({
+  onKeyConfigured,
   onCancel,
-  t, 
-  uiLanguage, 
+  t,
+  uiLanguage,
   onLanguageChange,
-  forceEdit = false 
+  forceEdit = false,
 }) => {
   const [checking, setChecking] = useState(true);
   const [config, setConfig] = useState<ApiConfig>({
     protocol: ApiProtocol.VERTEX_AI,
-    apiKey: '',
-    apiBase: '',
-    contentModelId: '',
-    imageModelId: '',
+    requestMode: RequestMode.CLIENT_DIRECT,
+    apiKey: "",
+    apiBase: "",
+    contentModelId: "",
+    imageModelId: "",
   });
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
@@ -43,22 +51,23 @@ export const ApiKeyModal: React.FC<Props> = ({
         setConfig({
           ...existingConfig,
           protocol: existingConfig.protocol || ApiProtocol.VERTEX_AI,
+          requestMode: existingConfig.requestMode || RequestMode.CLIENT_DIRECT,
         });
       }
-      
+
       if (!forceEdit && isApiConfigured()) {
         onKeyConfigured();
       }
       setChecking(false);
     };
-    
+
     checkConfig();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [forceEdit]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError('');
+    setError("");
 
     // 验证所有字段
     if (!config.apiKey.trim()) {
@@ -84,12 +93,13 @@ export const ApiKeyModal: React.FC<Props> = ({
       // 保存到 localStorage
       saveApiConfig({
         protocol: config.protocol,
+        requestMode: config.requestMode,
         apiKey: config.apiKey.trim(),
         apiBase: config.apiBase.trim(),
         contentModelId: config.contentModelId.trim(),
         imageModelId: config.imageModelId.trim(),
       });
-      
+
       onKeyConfigured();
     } catch {
       setError(t.errorFailed);
@@ -111,40 +121,43 @@ export const ApiKeyModal: React.FC<Props> = ({
 
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 overflow-y-auto py-8">
-      <div className="bg-card rounded-2xl p-8 max-w-lg w-full shadow-2xl mx-4">
+      <div className="bg-card rounded-2xl p-6 max-w-lg w-full shadow-2xl mx-4">
         {/* 顶部按钮栏 */}
-        <div className="flex justify-end items-center gap-2 mb-4">
+        <div className="flex justify-end items-center gap-2 mb-2">
           <button
-            onClick={() => onLanguageChange(uiLanguage === 'en' ? 'zh' : 'en')}
-            className="flex items-center gap-1.5 text-sm font-medium text-muted-foreground hover:text-primary transition-colors px-3 py-1.5 rounded-full hover:bg-muted"
+            onClick={() => onLanguageChange(uiLanguage === "en" ? "zh" : "en")}
+            className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground hover:text-primary transition-colors px-2 py-1 rounded-full hover:bg-muted"
           >
-            <Languages className="w-4 h-4" />
-            {uiLanguage === 'en' ? '中文' : 'English'}
+            <Languages className="w-3.5 h-3.5" />
+            {uiLanguage === "en" ? "中文" : "English"}
           </button>
-          
+
           {onCancel && (
             <button
               onClick={onCancel}
-              className="p-2 rounded-full hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
+              className="p-1.5 rounded-full hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
               type="button"
             >
-              <X className="w-5 h-5" />
+              <X className="w-4 h-4" />
             </button>
           )}
         </div>
 
-        <div className="text-center mb-6">
-          <div className="mx-auto bg-primary/10 w-16 h-16 rounded-full flex items-center justify-center mb-4">
-            <Key className="w-8 h-8 text-primary" />
+        <div className="flex items-start gap-4 mb-6">
+          <div className="bg-primary/10 w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0">
+            <Key className="w-6 h-6 text-primary" />
           </div>
-          <h2 className="text-2xl font-bold text-foreground mb-2">{t.configureApiKey}</h2>
-          <p className="text-muted-foreground text-sm">
-            {t.vertexConfigRequired}
-          </p>
+          <div className="flex-1">
+            <h2 className="text-lg font-bold text-foreground mb-1">
+              {t.configureApiKey}
+            </h2>
+            <p className="text-muted-foreground text-xs leading-normal">
+              {t.vertexConfigRequired}
+            </p>
+          </div>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
-          {/* API 协议选择 */}
           <div>
             <label className="block text-sm font-medium text-foreground mb-2">
               {t.apiProtocolLabel}
@@ -152,29 +165,32 @@ export const ApiKeyModal: React.FC<Props> = ({
             <div className="grid grid-cols-2 gap-3">
               <button
                 type="button"
-                onClick={() => setConfig({ ...config, protocol: ApiProtocol.VERTEX_AI })}
+                onClick={() =>
+                  setConfig({ ...config, protocol: ApiProtocol.VERTEX_AI })
+                }
                 className={`p-3 rounded-lg border-2 text-sm font-medium transition-all ${
                   config.protocol === ApiProtocol.VERTEX_AI
-                    ? 'border-primary bg-primary/10 text-primary'
-                    : 'border-border hover:border-input text-muted-foreground'
+                    ? "border-primary bg-primary/10 text-primary"
+                    : "border-border hover:border-input text-muted-foreground"
                 }`}
               >
                 {t.protocolVertexAI}
               </button>
               <button
                 type="button"
-                onClick={() => setConfig({ ...config, protocol: ApiProtocol.OPENAI })}
+                onClick={() =>
+                  setConfig({ ...config, protocol: ApiProtocol.OPENAI })
+                }
                 className={`p-3 rounded-lg border-2 text-sm font-medium transition-all ${
                   config.protocol === ApiProtocol.OPENAI
-                    ? 'border-primary bg-primary/10 text-primary'
-                    : 'border-border hover:border-input text-muted-foreground'
+                    ? "border-primary bg-primary/10 text-primary"
+                    : "border-border hover:border-input text-muted-foreground"
                 }`}
               >
                 {t.protocolOpenAI}
               </button>
             </div>
           </div>
-
           <div>
             <label className="block text-sm font-medium text-foreground mb-1">
               {t.apiKeyLabel}
@@ -183,7 +199,9 @@ export const ApiKeyModal: React.FC<Props> = ({
               type="password"
               value={config.apiKey}
               onChange={(e) => setConfig({ ...config, apiKey: e.target.value })}
-              placeholder={config.protocol === ApiProtocol.OPENAI ? "sk-..." : "AIza..."}
+              placeholder={
+                config.protocol === ApiProtocol.OPENAI ? "sk-..." : "AIza..."
+              }
               className="w-full px-4 py-3 border border-input rounded-lg focus:ring-2 focus:ring-ring focus:border-primary"
               disabled={submitting}
             />
@@ -196,10 +214,14 @@ export const ApiKeyModal: React.FC<Props> = ({
             <input
               type="text"
               value={config.apiBase}
-              onChange={(e) => setConfig({ ...config, apiBase: e.target.value })}
-              placeholder={config.protocol === ApiProtocol.OPENAI 
-                ? "https://api.openai.com/v1" 
-                : "https://generativelanguage.googleapis.com/v1beta"}
+              onChange={(e) =>
+                setConfig({ ...config, apiBase: e.target.value })
+              }
+              placeholder={
+                config.protocol === ApiProtocol.OPENAI
+                  ? "https://api.openai.com/v1"
+                  : "https://generativelanguage.googleapis.com/v1beta"
+              }
               className="w-full px-4 py-3 border border-input rounded-lg focus:ring-2 focus:ring-ring focus:border-primary"
               disabled={submitting}
             />
@@ -212,8 +234,14 @@ export const ApiKeyModal: React.FC<Props> = ({
             <input
               type="text"
               value={config.contentModelId}
-              onChange={(e) => setConfig({ ...config, contentModelId: e.target.value })}
-              placeholder={config.protocol === ApiProtocol.OPENAI ? "gpt-4o" : "gemini-2.0-flash"}
+              onChange={(e) =>
+                setConfig({ ...config, contentModelId: e.target.value })
+              }
+              placeholder={
+                config.protocol === ApiProtocol.OPENAI
+                  ? "gpt-5.1"
+                  : "gemini-3-pro-preview"
+              }
               className="w-full px-4 py-3 border border-input rounded-lg focus:ring-2 focus:ring-ring focus:border-primary"
               disabled={submitting}
             />
@@ -226,11 +254,58 @@ export const ApiKeyModal: React.FC<Props> = ({
             <input
               type="text"
               value={config.imageModelId}
-              onChange={(e) => setConfig({ ...config, imageModelId: e.target.value })}
-              placeholder={config.protocol === ApiProtocol.OPENAI ? "gpt-image-1" : "gemini-2.0-flash-exp"}
+              onChange={(e) =>
+                setConfig({ ...config, imageModelId: e.target.value })
+              }
+              placeholder={
+                config.protocol === ApiProtocol.OPENAI
+                  ? "gpt-5-image"
+                  : "gemini-3-pro-image-preview"
+              }
               className="w-full px-4 py-3 border border-input rounded-lg focus:ring-2 focus:ring-ring focus:border-primary"
               disabled={submitting}
             />
+          </div>
+
+          {/* 请求模式选择 */}
+          <div>
+            <label className="block text-sm font-medium text-foreground mb-2">
+              {t.requestModeLabel}
+            </label>
+            <div className="grid grid-cols-2 gap-3">
+              <button
+                type="button"
+                onClick={() =>
+                  setConfig({ ...config, requestMode: RequestMode.CLIENT_DIRECT })
+                }
+                className={`flex flex-col items-center justify-center p-3 rounded-lg border-2 transition-all ${
+                  config.requestMode === RequestMode.CLIENT_DIRECT
+                    ? "border-primary bg-primary/10 text-primary"
+                    : "border-border hover:border-input text-muted-foreground"
+                }`}
+              >
+                <span className="text-sm font-medium">
+                  {t.requestModeClientDirect}
+                </span>
+                <span className="text-[10px] opacity-80 mt-1">Browser Fetch</span>
+              </button>
+              <button
+                type="button"
+                onClick={() =>
+                  setConfig({ ...config, requestMode: RequestMode.SERVER_PROXY })
+                }
+                className={`flex flex-col items-center justify-center p-3 rounded-lg border-2 transition-all ${
+                  config.requestMode === RequestMode.SERVER_PROXY
+                    ? "border-primary bg-primary/10 text-primary"
+                    : "border-border hover:border-input text-muted-foreground"
+                }`}
+              >
+                <span className="text-sm font-medium">
+                  {t.requestModeServerProxy}
+                </span>
+                <span className="text-[10px] opacity-80 mt-1">API Route</span>
+              </button>
+            </div>
           </div>
 
           {error && (
@@ -255,12 +330,6 @@ export const ApiKeyModal: React.FC<Props> = ({
             )}
           </button>
         </form>
-
-        <div className="mt-6 pt-4 border-t border-border">
-          <p className="text-xs text-muted-foreground text-center">
-            {t.configStoredLocally}
-          </p>
-        </div>
       </div>
     </div>
   );
