@@ -1,24 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { GoogleGenAI, Type, Schema } from '@google/genai';
 import type { PresentationConfig } from '@/lib/types';
 import { SlideStyle } from '@/lib/types';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
+const GEMINI_API_BASE = 'https://generativelanguage.googleapis.com/v1beta';
+
 /**
- * 创建 GoogleGenAI 实例
- * 
- * 注意：Google Gemini API 会根据请求的源 IP 地址判断用户位置。
- * 即使部署在 Cloudflare 美国节点，如果 Cloudflare 的出口 IP 被识别为不支持的区域，
- * 仍然会收到 "User location is not supported" 错误。
- * 
- * 解决方案：
- * 1. 使用 httpOptions.headers 确保不传递任何客户端相关的 headers
- * 2. 如果问题持续，考虑使用 Vertex AI（设置 vertexai: true）
+ * 获取 API Key
  */
-function getGenAI(request: NextRequest): GoogleGenAI {
-  // Priority: 1. Request header, 2. Environment variable
+function getApiKey(request: NextRequest): string {
   const headerKey = request.headers.get('x-api-key');
   const apiKey = headerKey || process.env.GEMINI_API_KEY;
   
@@ -26,35 +18,79 @@ function getGenAI(request: NextRequest): GoogleGenAI {
     throw new Error('API key not configured. Please add GEMINI_API_KEY to .env.local');
   }
   
-  // 检查是否使用 Vertex AI（无区域限制）
-  const useVertexAI = process.env.USE_VERTEX_AI === 'true';
+  return apiKey;
+}
+
+/**
+ * 使用原生 fetch 调用 Gemini API
+ * 完全控制请求，不传递任何客户端信息
+ */
+async function callGeminiAPI(
+  apiKey: string,
+  model: string,
+  requestBody: Record<string, unknown>
+): Promise<unknown> {
+  const url = `${GEMINI_API_BASE}/models/${model}:generateContent?key=${apiKey}`;
   
-  if (useVertexAI) {
-    // Vertex AI 模式 - 需要配置 GOOGLE_CLOUD_PROJECT 和 GOOGLE_CLOUD_LOCATION
-    return new GoogleGenAI({
-      vertexai: true,
-      project: process.env.GOOGLE_CLOUD_PROJECT,
-      location: process.env.GOOGLE_CLOUD_LOCATION || 'us-central1',
-      httpOptions: {
-        headers: {},
-      },
-    });
-  }
-  
-  // Gemini API 模式 - 使用 httpOptions 确保纯服务端请求
-  return new GoogleGenAI({
-    apiKey,
-    httpOptions: {
-      // 显式设置空的 headers，确保不传递任何客户端相关的 headers
-      // 如 X-Forwarded-For, CF-Connecting-IP, X-Real-IP 等
-      headers: {},
+  const response = await fetch(url, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      // 只设置必要的 headers，不传递任何客户端相关信息
     },
+    body: JSON.stringify(requestBody),
   });
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    const errorMessage = (errorData as { error?: { message?: string } })?.error?.message || response.statusText;
+    throw new Error(`Gemini API error: ${errorMessage}`);
+  }
+
+  return response.json();
+}
+
+interface GeminiResponse {
+  candidates?: Array<{
+    content?: {
+      parts?: Array<{
+        text?: string;
+        inlineData?: {
+          mimeType?: string;
+          data?: string;
+        };
+      }>;
+    };
+  }>;
+}
+
+/**
+ * 从 Gemini 响应中提取文本
+ */
+function extractText(response: GeminiResponse): string {
+  const text = response.candidates?.[0]?.content?.parts?.[0]?.text;
+  if (!text) {
+    throw new Error('No text in response');
+  }
+  return text;
+}
+
+/**
+ * 从 Gemini 响应中提取图片
+ */
+function extractImage(response: GeminiResponse): string | null {
+  for (const part of response.candidates?.[0]?.content?.parts || []) {
+    if (part.inlineData?.data) {
+      const mimeType = part.inlineData.mimeType || 'image/png';
+      return `data:${mimeType};base64,${part.inlineData.data}`;
+    }
+  }
+  return null;
 }
 
 export async function POST(request: NextRequest) {
   try {
-    const genAI = getGenAI(request);
+    const apiKey = getApiKey(request);
     const body = await request.json();
     const { action, payload } = body;
 
@@ -67,13 +103,13 @@ export async function POST(request: NextRequest) {
 
     switch (action) {
       case 'plan-presentation':
-        return await handlePlanPresentation(genAI, payload);
+        return await handlePlanPresentation(apiKey, payload);
       
       case 'generate-image':
-        return await handleGenerateImage(genAI, payload);
+        return await handleGenerateImage(apiKey, payload);
       
       case 'optimize-content':
-        return await handleOptimizeContent(genAI, payload);
+        return await handleOptimizeContent(apiKey, payload);
       
       default:
         return NextResponse.json(
@@ -99,7 +135,7 @@ interface PlanPayload {
   model?: string;
 }
 
-async function handlePlanPresentation(genAI: GoogleGenAI, payload: PlanPayload) {
+async function handlePlanPresentation(apiKey: string, payload: PlanPayload) {
   const { document, prompt, model = 'gemini-2.5-flash' } = payload;
 
   if (!document && !prompt) {
@@ -145,45 +181,48 @@ async function handlePlanPresentation(genAI: GoogleGenAI, payload: PlanPayload) 
     3. 'visualDescription': A highly detailed, artistic description of how the slide should look visually.
   `;
 
-  const responseSchema: Schema = {
-    type: Type.OBJECT,
-    properties: {
-      title: { type: Type.STRING },
-      slides: {
-        type: Type.ARRAY,
-        items: {
-          type: Type.OBJECT,
-          properties: {
-            title: { type: Type.STRING },
-            bulletPoints: { type: Type.ARRAY, items: { type: Type.STRING } },
-            visualDescription: { type: Type.STRING },
-          },
-          required: ['title', 'bulletPoints', 'visualDescription'],
-        },
-      },
+  // 构建符合 Gemini REST API 格式的请求体
+  const requestBody = {
+    systemInstruction: {
+      parts: [{ text: systemInstruction }],
     },
-    required: ['title', 'slides'],
-  };
-
-  try {
-    const response = await genAI.models.generateContent({
-      model,
-      contents: {
+    contents: [
+      {
         role: 'user',
         parts: [{ text: `Input Text:\n${(document || '').substring(0, 30000)}` }],
       },
-      config: {
-        systemInstruction,
-        responseMimeType: 'application/json',
-        responseSchema,
+    ],
+    generationConfig: {
+      responseMimeType: 'application/json',
+      responseSchema: {
+        type: 'OBJECT',
+        properties: {
+          title: { type: 'STRING' },
+          slides: {
+            type: 'ARRAY',
+            items: {
+              type: 'OBJECT',
+              properties: {
+                title: { type: 'STRING' },
+                bulletPoints: { type: 'ARRAY', items: { type: 'STRING' } },
+                visualDescription: { type: 'STRING' },
+              },
+              required: ['title', 'bulletPoints', 'visualDescription'],
+            },
+          },
+        },
+        required: ['title', 'slides'],
       },
-    });
+    },
+  };
 
-    if (!response.text) throw new Error('No response from AI');
+  try {
+    const response = await callGeminiAPI(apiKey, model, requestBody);
+    const text = extractText(response as GeminiResponse);
 
     return NextResponse.json({
       success: true,
-      data: { content: response.text },
+      data: { content: text },
     });
   } catch (error) {
     throw error;
@@ -195,8 +234,8 @@ interface ImagePayload {
   model?: string;
 }
 
-async function handleGenerateImage(genAI: GoogleGenAI, payload: ImagePayload) {
-  const { prompt, model = 'gemini-2.5-flash-image' } = payload;
+async function handleGenerateImage(apiKey: string, payload: ImagePayload) {
+  const { prompt, model = 'gemini-2.0-flash-exp' } = payload;
 
   if (!prompt) {
     return NextResponse.json(
@@ -237,32 +276,59 @@ async function handleGenerateImage(genAI: GoogleGenAI, payload: ImagePayload) {
     - Aspect Ratio 16:9.
   `;
 
-  const imageConfig: Record<string, string> = {
-    aspectRatio: '16:9',
-  };
-
-  if (model.includes('pro')) {
-    imageConfig.imageSize = '2K';
-  }
+  // 使用 Imagen 3 模型生成图片
+  const imagenModel = 'imagen-3.0-generate-002';
+  const imagenUrl = `${GEMINI_API_BASE}/models/${imagenModel}:predict?key=${apiKey}`;
 
   try {
-    const response = await genAI.models.generateContent({
-      model,
-      contents: {
-        parts: [{ text: fullPrompt }],
+    const response = await fetch(imagenUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
       },
-      config: {
-        imageConfig,
-      },
+      body: JSON.stringify({
+        instances: [{ prompt: fullPrompt }],
+        parameters: {
+          sampleCount: 1,
+          aspectRatio: '16:9',
+        },
+      }),
     });
 
-    for (const part of response.candidates?.[0]?.content?.parts || []) {
-      if (part.inlineData) {
+    if (!response.ok) {
+      // 如果 Imagen 失败，回退到 Gemini 2.0 Flash 的图片生成
+      const geminiRequestBody = {
+        contents: [
+          {
+            parts: [{ text: fullPrompt }],
+          },
+        ],
+        generationConfig: {
+          responseModalities: ['IMAGE', 'TEXT'],
+        },
+      };
+
+      const geminiResponse = await callGeminiAPI(apiKey, model, geminiRequestBody);
+      const imageData = extractImage(geminiResponse as GeminiResponse);
+
+      if (imageData) {
         return NextResponse.json({
           success: true,
-          data: { content: `data:image/png;base64,${part.inlineData.data}` },
+          data: { content: imageData },
         });
       }
+
+      throw new Error('No image generated');
+    }
+
+    const result = await response.json() as { predictions?: Array<{ bytesBase64Encoded?: string }> };
+    const imageBase64 = result.predictions?.[0]?.bytesBase64Encoded;
+
+    if (imageBase64) {
+      return NextResponse.json({
+        success: true,
+        data: { content: `data:image/png;base64,${imageBase64}` },
+      });
     }
 
     throw new Error('No image generated');
@@ -276,7 +342,7 @@ interface OptimizePayload {
   model?: string;
 }
 
-async function handleOptimizeContent(genAI: GoogleGenAI, payload: OptimizePayload) {
+async function handleOptimizeContent(apiKey: string, payload: OptimizePayload) {
   const { prompt, model = 'gemini-2.5-flash' } = payload;
 
   if (!prompt) {
@@ -288,20 +354,23 @@ async function handleOptimizeContent(genAI: GoogleGenAI, payload: OptimizePayloa
 
   const fullPrompt = `优化以下演示文稿内容，使其更加清晰、专业和吸引人：\n\n${prompt}`;
 
-  try {
-    const response = await genAI.models.generateContent({
-      model,
-      contents: {
+  const requestBody = {
+    contents: [
+      {
         parts: [{ text: fullPrompt }],
       },
-    });
+    ],
+  };
+
+  try {
+    const response = await callGeminiAPI(apiKey, model, requestBody);
+    const text = extractText(response as GeminiResponse);
 
     return NextResponse.json({
       success: true,
-      data: { content: response.text || '' },
+      data: { content: text },
     });
   } catch (error) {
     throw error;
   }
 }
-
