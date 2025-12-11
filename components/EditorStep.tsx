@@ -16,7 +16,7 @@ import {
   type Presentation,
   type PresentationConfig,
 } from "@/lib/types";
-import { getApiHeaders } from "@/lib/api";
+import { generateSlideImage } from "@/lib/vertex-api";
 import type { translations } from "@/lib/translations";
 
 interface Props {
@@ -48,34 +48,19 @@ export const EditorStep: React.FC<Props> = ({
     setPresentation({ ...presentation, slides: newSlides });
 
     try {
-      const imageResponse = await fetch("/api/gemini", {
-        method: "POST",
-        headers: getApiHeaders(),
-        body: JSON.stringify({
-          action: "generate-image",
-          payload: {
-            prompt: JSON.stringify({
-              slide: slide.content,
-              deckTitle: presentation.title,
-              config,
-            }),
-            model: config.imageModel,
-          },
-        }),
-      });
-
-      const imageResult = await imageResponse.json();
-      if (imageResult.success) {
-        slide.status = "completed";
-        slide.imageUrl = imageResult.data.content;
-      } else {
-        slide.status = "failed";
-      }
+      const imageUrl = await generateSlideImage(
+        slide.content,
+        presentation.title,
+        config
+      );
+      
+      slide.status = "completed";
+      slide.imageUrl = imageUrl;
     } catch (e: unknown) {
       slide.status = "failed";
-      const err = e as { message?: string; status?: number };
-      if (err.message?.includes("location") || err.status === 400) {
-        alert("Location not supported for image generation.");
+      const err = e as { message?: string };
+      if (err.message) {
+        alert(`Error: ${err.message}`);
       }
     }
 

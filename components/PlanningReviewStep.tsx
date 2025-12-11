@@ -3,7 +3,7 @@
 import React from 'react';
 import { ChevronLeft, Play, Plus, Trash2 } from 'lucide-react';
 import { Presentation, AppStep, Slide, SlideContent, PresentationConfig } from '@/lib/types';
-import { getApiHeaders } from '@/lib/api';
+import { generateSlideImage } from '@/lib/vertex-api';
 import type { translations } from '@/lib/translations';
 
 interface Props {
@@ -81,32 +81,17 @@ export const PlanningReviewStep: React.FC<Props> = ({
             setPresentation({ ...presentation, slides: [...updatedSlides] });
     
             try {
-              const imageResponse = await fetch('/api/gemini', {
-                method: 'POST',
-                headers: getApiHeaders(),
-                body: JSON.stringify({
-                  action: 'generate-image',
-                  payload: {
-                    prompt: JSON.stringify({
-                      slide: updatedSlides[i].content,
-                      deckTitle: presentation.title,
-                      config
-                    }),
-                    model: config.imageModel
-                  }
-                })
-              });
-    
-              const imageResult = await imageResponse.json();
-              if (imageResult.success) {
-                updatedSlides[i] = {
-                  ...updatedSlides[i],
-                  status: 'completed' as const,
-                  imageUrl: imageResult.data.content
-                };
-              } else {
-                updatedSlides[i] = { ...updatedSlides[i], status: 'failed' as const };
-              }
+              const imageUrl = await generateSlideImage(
+                updatedSlides[i].content,
+                presentation.title,
+                config
+              );
+              
+              updatedSlides[i] = {
+                ...updatedSlides[i],
+                status: 'completed' as const,
+                imageUrl
+              };
             } catch (err) {
               console.error(`Failed slide ${i + 1}`, err);
               updatedSlides[i] = { ...updatedSlides[i], status: 'failed' as const };
@@ -124,8 +109,6 @@ export const PlanningReviewStep: React.FC<Props> = ({
     } catch (error) {
         console.error("Image generation process failed", error);
         setIsGenerating(false);
-        // We might want to stay on GENERATING or go back to REVIEW if critical failure,
-        // but here we likely just have partial results.
         setStep(AppStep.EDITOR); 
     }
   };

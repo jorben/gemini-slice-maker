@@ -1,11 +1,11 @@
 'use client';
 
 import React from 'react';
-import { ChevronLeft, Wand2, Cpu, Image as ImageIcon } from 'lucide-react';
+import { ChevronLeft, Wand2 } from 'lucide-react';
 import type { PresentationConfig, InputSource, Presentation, SlideContent, Slide } from '@/lib/types';
 import { SlideStyle, AppStep } from '@/lib/types';
 import type { Language, translations } from '@/lib/translations';
-import { getApiHeaders } from '@/lib/api';
+import { planPresentation } from '@/lib/vertex-api';
 
 interface Props {
   config: PresentationConfig;
@@ -39,26 +39,10 @@ export const ConfigStep: React.FC<Props> = ({
     setGenerationProgress(10);
 
     try {
-      // 1. Plan Structure via API
-      const planResponse = await fetch('/api/gemini', {
-        method: 'POST',
-        headers: getApiHeaders(),
-        body: JSON.stringify({
-          action: 'plan-presentation',
-          payload: {
-            document: inputSource.textContent || inputSource.fileData,
-            prompt: JSON.stringify(config),
-            model: config.contentModel
-          }
-        })
-      });
-
-      const planResult = await planResponse.json();
-      if (!planResult.success) {
-        throw new Error(planResult.error || 'Failed to plan presentation');
-      }
-
-      const plan = JSON.parse(planResult.data.content);
+      // 直接调用前端 API
+      const document = inputSource.textContent || inputSource.fileData || '';
+      const plan = await planPresentation(document, config);
+      
       setGenerationProgress(30);
 
       const initialSlides: Slide[] = plan.slides.map((s: SlideContent, i: number) => ({
@@ -81,11 +65,11 @@ export const ConfigStep: React.FC<Props> = ({
       console.error("Generation failed", error);
 
       let msg = "Failed to generate presentation. Please try again.";
-      const err = error as { message?: string; status?: number };
-      if (err.message?.includes('location') || err.status === 400) {
+      const err = error as { message?: string };
+      if (err.message) {
         msg = uiLanguage === 'en'
-          ? "API Error: User location is not supported for this model."
-          : "API 错误：您所在的地区不支持此模型。";
+          ? `API Error: ${err.message}`
+          : `API 错误：${err.message}`;
       }
 
       alert(msg);
@@ -146,29 +130,26 @@ export const ConfigStep: React.FC<Props> = ({
 
         <div className="col-span-2 grid grid-cols-1 md:grid-cols-2 gap-8">
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-2 flex items-center gap-2">
-              <Cpu className="w-4 h-4" /> {t.contentModelLabel}
-            </label>
-            <select 
-              value={config.contentModel}
-              onChange={(e) => setConfig({...config, contentModel: e.target.value})}
-              className="w-full p-3 border border-slate-300 rounded-lg bg-white focus:ring-indigo-500 focus:border-indigo-500"
-            >
-              <option value="gemini-2.5-flash">{t.contentModels.flash}</option>
-              <option value="gemini-3-pro-preview">{t.contentModels.pro}</option>
-            </select>
+            <label className="block text-sm font-medium text-slate-700 mb-2">{t.approxSlides}</label>
+            <input 
+              type="number" 
+              min={1} 
+              max={40}
+              value={config.pageCount}
+              onChange={(e) => setConfig({...config, pageCount: parseInt(e.target.value) || 5})}
+              className="w-full p-3 border border-slate-300 rounded-lg"
+            />
           </div>
+
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-2 flex items-center gap-2">
-              <ImageIcon className="w-4 h-4" /> {t.imageModelLabel}
-            </label>
+            <label className="block text-sm font-medium text-slate-700 mb-2">{t.outputLang}</label>
             <select 
-              value={config.imageModel}
-              onChange={(e) => setConfig({...config, imageModel: e.target.value})}
-              className="w-full p-3 border border-slate-300 rounded-lg bg-white focus:ring-indigo-500 focus:border-indigo-500"
+              value={config.language}
+              onChange={(e) => setConfig({...config, language: e.target.value as 'English' | 'Chinese'})}
+              className="w-full p-3 border border-slate-300 rounded-lg bg-white"
             >
-              <option value="gemini-2.5-flash-image">{t.imageModels.flash}</option>
-              <option value="gemini-3-pro-image-preview">{t.imageModels.pro}</option>
+              <option value="English">English</option>
+              <option value="Chinese">Simplified Chinese (简体中文)</option>
             </select>
           </div>
         </div>
@@ -181,30 +162,6 @@ export const ConfigStep: React.FC<Props> = ({
             value={config.additionalPrompt || ''}
             onChange={(e) => setConfig({...config, additionalPrompt: e.target.value})}
           />
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium text-slate-700 mb-2">{t.approxSlides}</label>
-          <input 
-            type="number" 
-            min={1} 
-            max={40}
-            value={config.pageCount}
-            onChange={(e) => setConfig({...config, pageCount: parseInt(e.target.value) || 5})}
-            className="w-full p-3 border border-slate-300 rounded-lg"
-          />
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium text-slate-700 mb-2">{t.outputLang}</label>
-          <select 
-            value={config.language}
-            onChange={(e) => setConfig({...config, language: e.target.value as 'English' | 'Chinese'})}
-            className="w-full p-3 border border-slate-300 rounded-lg bg-white"
-          >
-            <option value="English">English</option>
-            <option value="Chinese">Simplified Chinese (简体中文)</option>
-          </select>
         </div>
       </div>
 

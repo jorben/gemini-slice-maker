@@ -1,27 +1,57 @@
-// API utilities for making requests with proper headers
+// API 配置管理 - 使用 localStorage 存储
 
-export function getApiHeaders(): HeadersInit {
-  const headers: HeadersInit = {
-    'Content-Type': 'application/json',
-  };
-  
-  // Check for temporary API key stored in localStorage
-  if (typeof window !== 'undefined') {
-    const tempKey = localStorage.getItem('gemini_api_key_temp');
-    if (tempKey) {
-      headers['x-api-key'] = tempKey;
-    }
-  }
-  
-  return headers;
+export interface VertexApiConfig {
+  apiKey: string;
+  apiBase: string;
+  contentModelId: string;
+  imageModelId: string;
 }
 
-export async function apiRequest(action: string, payload: Record<string, unknown>) {
-  const response = await fetch('/api/gemini', {
-    method: 'POST',
-    headers: getApiHeaders(),
-    body: JSON.stringify({ action, payload }),
-  });
+const STORAGE_KEY = 'vertex_api_config';
+
+/**
+ * 获取存储的 API 配置
+ */
+export function getApiConfig(): VertexApiConfig | null {
+  if (typeof window === 'undefined') return null;
   
-  return response.json();
+  const stored = localStorage.getItem(STORAGE_KEY);
+  if (!stored) return null;
+  
+  try {
+    return JSON.parse(stored) as VertexApiConfig;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * 保存 API 配置到 localStorage
+ */
+export function saveApiConfig(config: VertexApiConfig): void {
+  if (typeof window === 'undefined') return;
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(config));
+}
+
+/**
+ * 检查 API 配置是否完整
+ */
+export function isApiConfigured(): boolean {
+  const config = getApiConfig();
+  if (!config) return false;
+  
+  return !!(
+    config.apiKey &&
+    config.apiBase &&
+    config.contentModelId &&
+    config.imageModelId
+  );
+}
+
+/**
+ * 清除 API 配置
+ */
+export function clearApiConfig(): void {
+  if (typeof window === 'undefined') return;
+  localStorage.removeItem(STORAGE_KEY);
 }
