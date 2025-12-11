@@ -10,6 +10,7 @@ import {
   Layout,
   Settings,
   Image as ImageIcon,
+  Trash2,
 } from "lucide-react";
 import {
   AppStep,
@@ -39,6 +40,34 @@ export const EditorStep: React.FC<Props> = ({
   setStep,
 }) => {
   const activeSlide = presentation.slides[activeSlideIndex];
+
+  const deleteSlide = (e: React.MouseEvent, index: number) => {
+    e.stopPropagation();
+
+    if (presentation.slides.length <= 1) {
+      alert("Cannot delete the last slide");
+      return;
+    }
+
+    // eslint-disable-next-line no-restricted-globals
+    if (confirm("Are you sure you want to delete this slide?")) {
+      const newSlides = [...presentation.slides];
+      newSlides.splice(index, 1);
+
+      // Re-index page numbers
+      newSlides.forEach((slide, i) => {
+        slide.pageNumber = i + 1;
+      });
+
+      setPresentation({ ...presentation, slides: newSlides });
+
+      if (activeSlideIndex >= newSlides.length) {
+        setActiveSlideIndex(Math.max(0, newSlides.length - 1));
+      } else if (index < activeSlideIndex) {
+        setActiveSlideIndex(activeSlideIndex - 1);
+      }
+    }
+  };
 
   const regenerateSlide = async (slideIndex: number) => {
     const newSlides = [...presentation.slides];
@@ -102,12 +131,19 @@ export const EditorStep: React.FC<Props> = ({
             <div
               key={slide.id}
               onClick={() => setActiveSlideIndex(idx)}
-              className={`p-2 rounded-lg cursor-pointer border-2 transition-all group ${
+              className={`relative p-2 rounded-lg cursor-pointer border-2 transition-all group ${
                 idx === activeSlideIndex
                   ? "border-primary bg-primary/10"
                   : "border-transparent hover:bg-muted"
               }`}
             >
+              <button
+                onClick={(e) => deleteSlide(e, idx)}
+                className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 p-1.5 bg-destructive text-destructive-foreground rounded-md shadow-sm hover:bg-destructive/90 transition-all z-10"
+                title={t.removeSlide}
+              >
+                <Trash2 className="w-3 h-3" />
+              </button>
               <div className="flex justify-between items-center mb-1">
                 <span className="text-xs font-bold text-muted-foreground">
                   #{slide.pageNumber}
@@ -213,7 +249,7 @@ export const EditorStep: React.FC<Props> = ({
             )}
 
             {activeSlide.status === "generating" && (
-              <div className="absolute inset-0 bg-card/80 z-20 flex flex-col items-center justify-center">
+              <div className="absolute inset-0 bg-card/70 backdrop-blur-sm z-20 flex flex-col items-center justify-center transition-all duration-300">
                 <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin mb-4"></div>
                 <p className="text-primary font-medium">{t.designing}</p>
               </div>
