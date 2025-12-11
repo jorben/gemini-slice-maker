@@ -148,7 +148,7 @@ export const PlanningReviewStep: React.FC<Props> = ({
                 </div>
                 
                 <div className="flex gap-4">
-                    <div className="flex-shrink-0 w-8 h-8 bg-primary/20 text-primary rounded-full flex items-center justify-center font-bold text-sm mt-1">
+                    <div className="flex-shrink-0 w-8 h-8 bg-primary/10 border-2 border-primary/20 text-primary rounded-full flex items-center justify-center font-bold text-sm mt-1">
                         {slide.pageNumber}
                     </div>
                     <div className="flex-grow space-y-4">

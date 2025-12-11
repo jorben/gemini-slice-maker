@@ -131,7 +131,7 @@ export const InputStep: React.FC<Props> = ({ inputSource, setInputSource, setSte
         <button
           disabled={!inputSource.textContent && !inputSource.fileData}
           onClick={() => setStep(AppStep.CONFIG)}
-          className="bg-primary hover:bg-primary/90 disabled:bg-muted text-primary-foreground text-lg font-semibold py-3 px-10 rounded-full transition-all shadow-lg hover:shadow-xl flex items-center gap-2"
+          className="bg-primary hover:bg-primary/90 disabled:bg-muted disabled:text-muted-foreground disabled:shadow-none text-primary-foreground text-lg font-semibold py-3 px-10 rounded-full transition-all shadow-lg hover:shadow-xl flex items-center gap-2"
         >
           {t.nextBtn} <ChevronRight className="w-5 h-5" />
         </button>

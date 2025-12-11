@@ -10,13 +10,13 @@ interface Props {
 export const ProgressBar: React.FC<Props> = ({ progress, label }) => {
   return (
     <div className="w-full">
-      {label && <div className="flex justify-between mb-1">
-        <span className="text-sm font-medium text-primary">{label}</span>
-        <span className="text-sm font-medium text-primary">{Math.round(progress)}%</span>
+      {label && <div className="flex justify-between mb-2">
+        <span className="text-sm font-medium text-muted-foreground">{label}</span>
+        <span className="text-sm font-medium text-muted-foreground">{Math.round(progress)}%</span>
       </div>}
-      <div className="w-full bg-muted rounded-full h-2.5">
+      <div className="w-full bg-black/5 dark:bg-white/10 border border-black/5 dark:border-white/5 rounded-full h-3 overflow-hidden backdrop-blur-sm">
         <div 
-          className="bg-primary h-2.5 rounded-full transition-all duration-500 ease-out" 
+          className="bg-primary h-full rounded-full transition-all duration-500 ease-out shadow-sm" 
           style={{ width: `${progress}%` }}
         ></div>
       </div>
