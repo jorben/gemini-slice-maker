@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Layout, Languages, Settings } from "lucide-react";
+import { Layout, Languages, Settings, Github } from "lucide-react";
 import { AppStep } from "@/lib/types";
 import type {
   Presentation,
@@ -65,9 +65,9 @@ export default function HomePage() {
   return (
     <div className="h-screen flex flex-col">
       {step === AppStep.API_KEY_CHECK && (
-        <ApiKeyModal 
-          onKeyConfigured={handleKeyConfigured} 
-          t={t} 
+        <ApiKeyModal
+          onKeyConfigured={handleKeyConfigured}
+          t={t}
           uiLanguage={uiLanguage}
           onLanguageChange={handleLanguageChange}
         />
@@ -99,6 +99,15 @@ export default function HomePage() {
               <Languages className="w-4 h-4" />
               {uiLanguage === "en" ? "中文" : "English"}
             </button>
+            <a
+              href="https://github.com/jorben/pptmaker"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-1.5 text-sm font-medium text-muted-foreground hover:text-primary transition-colors px-3 py-1.5 rounded-full hover:bg-muted"
+              title="GitHub"
+            >
+              <Github className="w-4 h-4" />
+            </a>
           </div>
         </header>
       )}
@@ -161,6 +170,18 @@ export default function HomePage() {
           />
         )}
       </main>
+
+      <footer className="py-2 text-center text-xs text-muted-foreground bg-card border-t border-border">
+        Powered by{" "}
+        <a
+          href="https://github.com/jorben/pptmaker"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="underline hover:text-primary transition-colors"
+        >
+          PPTMaker
+        </a>
+      </footer>
 
       {showApiModal && (
         <ApiKeyModal
