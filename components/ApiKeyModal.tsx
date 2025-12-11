@@ -1,20 +1,23 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { Key, Loader2, AlertCircle } from 'lucide-react';
-import { translations } from '@/lib/translations';
-import { getApiConfig, saveApiConfig, isApiConfigured, VertexApiConfig } from '@/lib/api';
+import { Key, Loader2, AlertCircle, Languages } from 'lucide-react';
+import { translations, Language } from '@/lib/translations';
+import { getApiConfig, saveApiConfig, isApiConfigured, VertexApiConfig, ApiProtocol } from '@/lib/api';
 
 type Translation = typeof translations.en;
 
 interface Props {
   onKeyConfigured: () => void;
   t: Translation;
+  uiLanguage: Language;
+  onLanguageChange: (lang: Language) => void;
 }
 
-export const ApiKeyModal: React.FC<Props> = ({ onKeyConfigured, t }) => {
+export const ApiKeyModal: React.FC<Props> = ({ onKeyConfigured, t, uiLanguage, onLanguageChange }) => {
   const [checking, setChecking] = useState(true);
   const [config, setConfig] = useState<VertexApiConfig>({
+    protocol: ApiProtocol.VERTEX_AI,
     apiKey: '',
     apiBase: '',
     contentModelId: '',
@@ -28,7 +31,10 @@ export const ApiKeyModal: React.FC<Props> = ({ onKeyConfigured, t }) => {
     const checkConfig = () => {
       const existingConfig = getApiConfig();
       if (existingConfig) {
-        setConfig(existingConfig);
+        setConfig({
+          ...existingConfig,
+          protocol: existingConfig.protocol || ApiProtocol.VERTEX_AI,
+        });
       }
       
       if (isApiConfigured()) {
@@ -68,6 +74,7 @@ export const ApiKeyModal: React.FC<Props> = ({ onKeyConfigured, t }) => {
     try {
       // 保存到 localStorage
       saveApiConfig({
+        protocol: config.protocol,
         apiKey: config.apiKey.trim(),
         apiBase: config.apiBase.trim(),
         contentModelId: config.contentModelId.trim(),
@@ -96,6 +103,17 @@ export const ApiKeyModal: React.FC<Props> = ({ onKeyConfigured, t }) => {
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 overflow-y-auto py-8">
       <div className="bg-white rounded-2xl p-8 max-w-lg w-full shadow-2xl mx-4">
+        {/* 语言切换按钮 */}
+        <div className="flex justify-end mb-4">
+          <button
+            onClick={() => onLanguageChange(uiLanguage === 'en' ? 'zh' : 'en')}
+            className="flex items-center gap-1.5 text-sm font-medium text-slate-600 hover:text-indigo-600 transition-colors px-3 py-1.5 rounded-full hover:bg-slate-100"
+          >
+            <Languages className="w-4 h-4" />
+            {uiLanguage === 'en' ? '中文' : 'English'}
+          </button>
+        </div>
+
         <div className="text-center mb-6">
           <div className="mx-auto bg-indigo-100 w-16 h-16 rounded-full flex items-center justify-center mb-4">
             <Key className="w-8 h-8 text-indigo-600" />
@@ -107,6 +125,37 @@ export const ApiKeyModal: React.FC<Props> = ({ onKeyConfigured, t }) => {
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
+          {/* API 协议选择 */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              {t.apiProtocolLabel}
+            </label>
+            <div className="grid grid-cols-2 gap-3">
+              <button
+                type="button"
+                onClick={() => setConfig({ ...config, protocol: ApiProtocol.VERTEX_AI })}
+                className={`p-3 rounded-lg border-2 text-sm font-medium transition-all ${
+                  config.protocol === ApiProtocol.VERTEX_AI
+                    ? 'border-indigo-600 bg-indigo-50 text-indigo-700'
+                    : 'border-gray-200 hover:border-gray-300 text-gray-600'
+                }`}
+              >
+                {t.protocolVertexAI}
+              </button>
+              <button
+                type="button"
+                onClick={() => setConfig({ ...config, protocol: ApiProtocol.OPENAI })}
+                className={`p-3 rounded-lg border-2 text-sm font-medium transition-all ${
+                  config.protocol === ApiProtocol.OPENAI
+                    ? 'border-indigo-600 bg-indigo-50 text-indigo-700'
+                    : 'border-gray-200 hover:border-gray-300 text-gray-600'
+                }`}
+              >
+                {t.protocolOpenAI}
+              </button>
+            </div>
+          </div>
+
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
               {t.apiKeyLabel}
@@ -115,7 +164,7 @@ export const ApiKeyModal: React.FC<Props> = ({ onKeyConfigured, t }) => {
               type="password"
               value={config.apiKey}
               onChange={(e) => setConfig({ ...config, apiKey: e.target.value })}
-              placeholder="sk-..."
+              placeholder={config.protocol === ApiProtocol.OPENAI ? "sk-..." : "AIza..."}
               className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
               disabled={submitting}
             />
@@ -129,7 +178,9 @@ export const ApiKeyModal: React.FC<Props> = ({ onKeyConfigured, t }) => {
               type="text"
               value={config.apiBase}
               onChange={(e) => setConfig({ ...config, apiBase: e.target.value })}
-              placeholder="https://your-vertex-api-endpoint/v1beta"
+              placeholder={config.protocol === ApiProtocol.OPENAI 
+                ? "https://api.openai.com/v1" 
+                : "https://generativelanguage.googleapis.com/v1beta"}
               className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
               disabled={submitting}
             />
@@ -143,7 +194,7 @@ export const ApiKeyModal: React.FC<Props> = ({ onKeyConfigured, t }) => {
               type="text"
               value={config.contentModelId}
               onChange={(e) => setConfig({ ...config, contentModelId: e.target.value })}
-              placeholder="gemini-2.0-flash"
+              placeholder={config.protocol === ApiProtocol.OPENAI ? "gpt-4o" : "gemini-2.0-flash"}
               className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
               disabled={submitting}
             />
@@ -157,7 +208,7 @@ export const ApiKeyModal: React.FC<Props> = ({ onKeyConfigured, t }) => {
               type="text"
               value={config.imageModelId}
               onChange={(e) => setConfig({ ...config, imageModelId: e.target.value })}
-              placeholder="gemini-2.0-flash-exp"
+              placeholder={config.protocol === ApiProtocol.OPENAI ? "gpt-image-1" : "gemini-2.0-flash-exp"}
               className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
               disabled={submitting}
             />

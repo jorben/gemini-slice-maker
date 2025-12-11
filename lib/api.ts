@@ -1,6 +1,13 @@
 // API 配置管理 - 使用 localStorage 存储
 
+// API 协议类型
+export enum ApiProtocol {
+  VERTEX_AI = 'vertex_ai',
+  OPENAI = 'openai',
+}
+
 export interface VertexApiConfig {
+  protocol: ApiProtocol;
   apiKey: string;
   apiBase: string;
   contentModelId: string;
@@ -41,6 +48,7 @@ export function isApiConfigured(): boolean {
   if (!config) return false;
   
   return !!(
+    config.protocol &&
     config.apiKey &&
     config.apiBase &&
     config.contentModelId &&

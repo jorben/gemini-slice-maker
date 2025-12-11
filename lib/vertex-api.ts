@@ -1,7 +1,14 @@
 // VertexAI Compatible API - 前端直接调用
 
-import { getApiConfig, VertexApiConfig } from "./api";
-import { SlideStyle, PresentationConfig, SlideContent } from "./types";
+import { getApiConfig, VertexApiConfig, ApiProtocol } from "./api";
+import { PresentationConfig, SlideContent } from "./types";
+import { planPresentationOpenAI, generateSlideImageOpenAI } from "./openai-api";
+import {
+  buildPlanningSystemPrompt,
+  buildPlanningUserPrompt,
+  getPlanningResponseSchema,
+  buildImageGenerationPrompt,
+} from "./prompts";
 
 interface GeminiResponse {
   candidates?: Array<{
@@ -98,32 +105,12 @@ export async function planPresentation(
     throw new Error("API not configured");
   }
 
-  const stylePrompt =
-    presentationConfig.style === SlideStyle.CUSTOM
-      ? `Custom Style: ${presentationConfig.customStyleDescription}`
-      : `Style: ${
-          presentationConfig.style === SlideStyle.MINIMAL
-            ? "Minimalist, high impact, few words"
-            : "Detailed, educational, comprehensive"
-        }`;
+  // 根据协议类型选择调用方式
+  if (apiConfig.protocol === ApiProtocol.OPENAI) {
+    return planPresentationOpenAI(apiConfig, document, presentationConfig);
+  }
 
-  const additionalContext = presentationConfig.additionalPrompt
-    ? `\nImportant Additional Instructions from User: ${presentationConfig.additionalPrompt}`
-    : "";
-
-  const systemInstruction = `
-    You are an expert presentation designer. 
-    Analyze the provided input (text or document) and split it into a ${presentationConfig.pageCount}-page presentation.
-    Output Language: ${presentationConfig.language}.
-    ${stylePrompt}
-    ${additionalContext}
-
-    Return a JSON object with a 'title' for the whole deck and an array of 'slides'.
-    For each slide, provide:
-    1. 'title': The slide headline.
-    2. 'bulletPoints': 3-5 key points (text only).
-    3. 'visualDescription': A highly detailed, artistic description of how the slide should look visually.
-  `;
+  const systemInstruction = buildPlanningSystemPrompt(presentationConfig);
 
   const requestBody = {
     systemInstruction: {
@@ -132,30 +119,12 @@ export async function planPresentation(
     contents: [
       {
         role: "user",
-        parts: [{ text: `Input Text:\n${document.substring(0, 30000)}` }],
+        parts: [{ text: buildPlanningUserPrompt(document) }],
       },
     ],
     generationConfig: {
       responseMimeType: "application/json",
-      responseSchema: {
-        type: "OBJECT",
-        properties: {
-          title: { type: "STRING" },
-          slides: {
-            type: "ARRAY",
-            items: {
-              type: "OBJECT",
-              properties: {
-                title: { type: "STRING" },
-                bulletPoints: { type: "ARRAY", items: { type: "STRING" } },
-                visualDescription: { type: "STRING" },
-              },
-              required: ["title", "bulletPoints", "visualDescription"],
-            },
-          },
-        },
-        required: ["title", "slides"],
-      },
+      responseSchema: getPlanningResponseSchema(),
     },
   };
 
@@ -181,34 +150,12 @@ export async function generateSlideImage(
     throw new Error("API not configured");
   }
 
-  const styleContext =
-    presentationConfig.style === SlideStyle.CUSTOM
-      ? presentationConfig.customStyleDescription
-      : presentationConfig.style === SlideStyle.MINIMAL
-      ? "Modern, clean, lots of whitespace, corporate memphis or swiss style"
-      : "Professional, structured, grid layout, academic or technical style";
+  // 根据协议类型选择调用方式
+  if (apiConfig.protocol === ApiProtocol.OPENAI) {
+    return generateSlideImageOpenAI(apiConfig, slide, deckTitle, presentationConfig);
+  }
 
-  const additionalContext = presentationConfig.additionalPrompt
-    ? `\nAdditional Style Requirements: ${presentationConfig.additionalPrompt}`
-    : "";
-
-  const fullPrompt = `
-    Design a professional presentation slide.
-    
-    Context:
-    Presentation Title: ${deckTitle}
-    Slide Title: ${slide.title}
-    Style Guide: ${styleContext}
-    ${additionalContext}
-    
-    Visual Instructions:
-    ${slide.visualDescription}
-    
-    Important:
-    - Create a high-quality slide design.
-    - Ensure the layout has clear space for text overlay.
-    - Aspect Ratio 16:9.
-  `;
+  const fullPrompt = buildImageGenerationPrompt(slide, deckTitle, presentationConfig);
 
   const requestBody = {
     contents: [
