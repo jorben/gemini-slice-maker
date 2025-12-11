@@ -1,10 +1,10 @@
-import type { Metadata } from 'next';
-import Script from 'next/script';
-import './globals.css';
+import type { Metadata } from "next";
+import Script from "next/script";
+import "./globals.css";
 
 export const metadata: Metadata = {
-  title: 'PPTMaker AI - Gemini Slice Maker',
-  description: 'AI-powered presentation planning and content generation with Gemini',
+  title: "PPTMaker AI - Gemini Slide Maker",
+  description: "AI-powered presentation planning and content generation",
 };
 
 export default function RootLayout({
@@ -15,7 +15,7 @@ export default function RootLayout({
   return (
     <html lang="zh-CN">
       <head>
-        <Script 
+        <Script
           src="https://cdn.jsdelivr.net/npm/mammoth@1.8.0/mammoth.browser.min.js"
           strategy="beforeInteractive"
         />
