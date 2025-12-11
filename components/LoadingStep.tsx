@@ -4,14 +4,14 @@ import React, { useRef } from 'react';
 import { Wand2, Clock, Loader2, CheckCircle, AlertCircle } from 'lucide-react';
 import type { Presentation } from '@/lib/types';
 import { AppStep } from '@/lib/types';
-import type { Language } from '@/lib/translations';
+import type { Language, translations } from '@/lib/translations';
 import { ProgressBar } from './ProgressBar';
 
 interface Props {
   step: AppStep;
   presentation: Presentation | null;
   generationProgress: number;
-  t: any;
+  t: typeof translations['en'];
   uiLanguage: Language;
 }
 
@@ -43,18 +43,24 @@ export const LoadingStep: React.FC<Props> = ({ step, presentation, generationPro
 
   // Phase 2: Generating Images
   if (step === AppStep.GENERATING && presentation) {
+    const completedCount = presentation.slides.filter(s => s.status === 'completed').length;
+    const totalCount = presentation.slides.length;
+    
     return (
       <div className="flex flex-col h-full max-w-3xl mx-auto p-6 animate-fade-in w-full">
         <div className="text-center mb-6">
           <h2 className="text-2xl font-bold text-slate-900 mb-2">{t.loadingGenerating}</h2>
           <div className="w-full max-w-md mx-auto">
-            <ProgressBar progress={generationProgress} label={`${Math.round(generationProgress)}%`} />
+            <ProgressBar 
+              progress={generationProgress} 
+              label={`${completedCount} / ${totalCount} ${t.slidesLabel}`} 
+            />
           </div>
         </div>
 
         <div className="flex-1 overflow-hidden flex flex-col bg-white rounded-xl border border-slate-200 shadow-sm relative">
           <div ref={progressListRef} className="flex-1 overflow-y-auto p-2 scroll-smooth">
-            {presentation.slides.map((slide, i) => (
+            {presentation.slides.map((slide) => (
               <div 
                 key={slide.id} 
                 className={`p-4 flex items-center gap-4 border-b border-slate-50 last:border-0 rounded-lg transition-colors ${

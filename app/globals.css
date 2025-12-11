@@ -25,3 +25,37 @@ body {
     text-wrap: balance;
   }
 }
+
+@media print {
+  @page {
+    size: landscape;
+    margin: 0;
+  }
+  
+  body {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+  
+  .print-only {
+    display: block !important;
+  }
+  
+  .print-slide {
+    width: 100vw;
+    height: 100vh;
+    page-break-after: always;
+    break-after: page;
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+    background: white;
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
+  
+  .print-slide:last-child {
+    page-break-after: avoid;
+    break-after: avoid;
+  }
+}

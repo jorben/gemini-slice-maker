@@ -26,7 +26,7 @@ export async function POST(request: Request) {
       success: true, 
       message: 'API key validated. Add it to .env.local for persistence.' 
     });
-  } catch (error) {
+  } catch {
     return NextResponse.json({ success: false, error: 'Invalid request' }, { status: 400 });
   }
 }

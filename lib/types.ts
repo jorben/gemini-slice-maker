@@ -6,7 +6,7 @@ declare global {
       openSelectKey: () => Promise<void>;
     };
     mammoth?: {
-      extractRawText: (options: { arrayBuffer: ArrayBuffer }) => Promise<{ value: string; messages: any[] }>;
+      extractRawText: (options: { arrayBuffer: ArrayBuffer }) => Promise<{ value: string; messages: unknown[] }>;
     };
   }
 }
@@ -16,6 +16,7 @@ export enum AppStep {
   INPUT = 'INPUT',
   CONFIG = 'CONFIG',
   PLANNING = 'PLANNING',
+  PLANNING_REVIEW = 'PLANNING_REVIEW',
   GENERATING = 'GENERATING',
   EDITOR = 'EDITOR'
 }

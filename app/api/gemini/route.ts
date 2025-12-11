@@ -59,12 +59,25 @@ export async function POST(request: NextRequest) {
   }
 }
 
-async function handlePlanPresentation(genAI: GoogleGenAI, payload: any) {
+interface PlanPayload {
+  document?: string;
+  prompt?: string;
+  model?: string;
+}
+
+async function handlePlanPresentation(genAI: GoogleGenAI, payload: PlanPayload) {
   const { document, prompt, model = 'gemini-2.5-flash' } = payload;
 
   if (!document && !prompt) {
     return NextResponse.json(
       { success: false, error: 'Missing document or prompt' },
+      { status: 400 }
+    );
+  }
+
+  if (!prompt) {
+    return NextResponse.json(
+      { success: false, error: 'Missing prompt' },
       { status: 400 }
     );
   }
@@ -123,7 +136,7 @@ async function handlePlanPresentation(genAI: GoogleGenAI, payload: any) {
       model,
       contents: {
         role: 'user',
-        parts: [{ text: `Input Text:\n${document.substring(0, 30000)}` }],
+        parts: [{ text: `Input Text:\n${(document || '').substring(0, 30000)}` }],
       },
       config: {
         systemInstruction,
@@ -143,7 +156,12 @@ async function handlePlanPresentation(genAI: GoogleGenAI, payload: any) {
   }
 }
 
-async function handleGenerateImage(genAI: GoogleGenAI, payload: any) {
+interface ImagePayload {
+  prompt?: string;
+  model?: string;
+}
+
+async function handleGenerateImage(genAI: GoogleGenAI, payload: ImagePayload) {
   const { prompt, model = 'gemini-2.5-flash-image' } = payload;
 
   if (!prompt) {
@@ -185,7 +203,7 @@ async function handleGenerateImage(genAI: GoogleGenAI, payload: any) {
     - Aspect Ratio 16:9.
   `;
 
-  const imageConfig: any = {
+  const imageConfig: Record<string, string> = {
     aspectRatio: '16:9',
   };
 
@@ -219,7 +237,12 @@ async function handleGenerateImage(genAI: GoogleGenAI, payload: any) {
   }
 }
 
-async function handleOptimizeContent(genAI: GoogleGenAI, payload: any) {
+interface OptimizePayload {
+  prompt?: string;
+  model?: string;
+}
+
+async function handleOptimizeContent(genAI: GoogleGenAI, payload: OptimizePayload) {
   const { prompt, model = 'gemini-2.5-flash' } = payload;
 
   if (!prompt) {

@@ -13,6 +13,7 @@ import {
 } from 'lucide-react';
 import type { Presentation, PresentationConfig } from '@/lib/types';
 import { getApiHeaders } from '@/lib/api';
+import type { translations } from '@/lib/translations';
 
 interface Props {
   presentation: Presentation;
@@ -20,7 +21,7 @@ interface Props {
   activeSlideIndex: number;
   setActiveSlideIndex: (index: number) => void;
   config: PresentationConfig;
-  t: any;
+  t: typeof translations['en'];
 }
 
 export const EditorStep: React.FC<Props> = ({ 
@@ -64,9 +65,10 @@ export const EditorStep: React.FC<Props> = ({
       } else {
         slide.status = 'failed';
       }
-    } catch (e: any) {
+    } catch (e: unknown) {
       slide.status = 'failed';
-      if (e.message?.includes('location') || e.status === 400) {
+      const err = e as { message?: string; status?: number };
+      if (err.message?.includes('location') || err.status === 400) {
         alert("Location not supported for image generation.");
       }
     }
@@ -107,6 +109,7 @@ export const EditorStep: React.FC<Props> = ({
               </div>
               <div className="aspect-video bg-slate-200 rounded overflow-hidden relative">
                 {slide.imageUrl ? (
+                  // eslint-disable-next-line @next/next/no-img-element
                   <img src={slide.imageUrl} alt="" className="w-full h-full object-cover" />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center">
@@ -165,6 +168,7 @@ export const EditorStep: React.FC<Props> = ({
         <div className="flex-1 overflow-y-auto p-8 flex items-center justify-center bg-slate-100 print:hidden">
           <div className="w-full max-w-5xl aspect-[16/9] bg-white shadow-2xl rounded-lg overflow-hidden relative">
             {activeSlide.imageUrl ? (
+              // eslint-disable-next-line @next/next/no-img-element
               <img src={activeSlide.imageUrl} alt="Slide" className="w-full h-full object-contain" />
             ) : (
               <div className="w-full h-full flex items-center justify-center bg-slate-100">
@@ -182,13 +186,14 @@ export const EditorStep: React.FC<Props> = ({
         </div>
 
         {/* Print View - All Slides */}
-        <div className="hidden print:block">
-          {presentation.slides.map((s, idx) => (
+        <div className="hidden print:block print-only">
+          {presentation.slides.map((s) => (
             <div 
               key={s.id} 
-              className={`w-full h-screen flex items-center justify-center bg-white ${idx < presentation.slides.length - 1 ? 'page-break-after-always' : ''}`}
+              className="print-slide"
             >
               {s.imageUrl ? (
+                // eslint-disable-next-line @next/next/no-img-element
                 <img src={s.imageUrl} className="max-w-full max-h-full object-contain" alt={`Slide ${s.pageNumber}`} />
               ) : (
                 <div className="text-gray-400 text-2xl">Slide {s.pageNumber}</div>

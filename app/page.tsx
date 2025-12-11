@@ -9,6 +9,7 @@ import { ApiKeyModal } from '@/components/ApiKeyModal';
 import { translations, Language } from '@/lib/translations';
 import { InputStep } from '@/components/InputStep';
 import { ConfigStep } from '@/components/ConfigStep';
+import { PlanningReviewStep } from '@/components/PlanningReviewStep';
 import { LoadingStep } from '@/components/LoadingStep';
 import { EditorStep } from '@/components/EditorStep';
 
@@ -27,7 +28,7 @@ export default function HomePage() {
   const [config, setConfig] = useState<PresentationConfig>(INITIAL_CONFIG);
   const [presentation, setPresentation] = useState<Presentation | null>(null);
   const [activeSlideIndex, setActiveSlideIndex] = useState(0);
-  const [isGenerating, setIsGenerating] = useState(false);
+  const [, setIsGenerating] = useState(false);
   const [generationProgress, setGenerationProgress] = useState(0);
 
   const t = translations[uiLanguage];
@@ -85,6 +86,18 @@ export default function HomePage() {
             uiLanguage={uiLanguage}
           />
         )}
+        {step === AppStep.PLANNING_REVIEW && presentation && (
+          <PlanningReviewStep 
+            presentation={presentation}
+            setPresentation={setPresentation}
+            setStep={setStep}
+            config={config}
+            setIsGenerating={setIsGenerating}
+            setGenerationProgress={setGenerationProgress}
+            t={t}
+            uiLanguage={uiLanguage}
+          />
+        )}
         {(step === AppStep.PLANNING || step === AppStep.GENERATING) && (
           <LoadingStep 
             step={step}
@@ -112,17 +125,23 @@ export default function HomePage() {
             margin: 0; 
             size: 16in 9in landscape;
           }
-          html, body {
-            width: 100%;
-            height: 100%;
+          html, body, #__next {
+            width: auto !important;
+            height: auto !important;
             margin: 0;
             padding: 0;
+            overflow: visible !important;
             -webkit-print-color-adjust: exact;
             print-color-adjust: exact;
           }
-          .page-break-after-always { 
-            page-break-after: always;
-            break-after: page;
+          .h-screen {
+            height: auto !important;
+          }
+          .overflow-hidden {
+            overflow: visible !important;
+          }
+          .flex-1 {
+            flex: none !important;
           }
         }
       `}</style>

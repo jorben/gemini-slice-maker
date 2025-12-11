@@ -4,7 +4,7 @@ import React from 'react';
 import { ChevronLeft, Wand2, Cpu, Image as ImageIcon } from 'lucide-react';
 import type { PresentationConfig, InputSource, Presentation, SlideContent, Slide } from '@/lib/types';
 import { SlideStyle, AppStep } from '@/lib/types';
-import type { Language } from '@/lib/translations';
+import type { Language, translations } from '@/lib/translations';
 import { getApiHeaders } from '@/lib/api';
 
 interface Props {
@@ -15,7 +15,7 @@ interface Props {
   setPresentation: (presentation: Presentation | null) => void;
   setIsGenerating: (isGenerating: boolean) => void;
   setGenerationProgress: (progress: number) => void;
-  t: any;
+  t: typeof translations['en'];
   uiLanguage: Language;
 }
 
@@ -73,62 +73,16 @@ export const ConfigStep: React.FC<Props> = ({
         slides: initialSlides
       });
 
-      setStep(AppStep.GENERATING);
-
-      // 2. Generate Images Sequentially
-      const updatedSlides = [...initialSlides];
-      const totalSlides = initialSlides.length;
-
-      for (let i = 0; i < totalSlides; i++) {
-        updatedSlides[i] = { ...updatedSlides[i], status: 'generating' as const };
-        setPresentation({ title: plan.title, slides: [...updatedSlides] });
-
-        try {
-          const imageResponse = await fetch('/api/gemini', {
-            method: 'POST',
-            headers: getApiHeaders(),
-            body: JSON.stringify({
-              action: 'generate-image',
-              payload: {
-                prompt: JSON.stringify({
-                  slide: updatedSlides[i].content,
-                  deckTitle: plan.title,
-                  config
-                }),
-                model: config.imageModel
-              }
-            })
-          });
-
-          const imageResult = await imageResponse.json();
-          if (imageResult.success) {
-            updatedSlides[i] = {
-              ...updatedSlides[i],
-              status: 'completed' as const,
-              imageUrl: imageResult.data.content
-            };
-          } else {
-            updatedSlides[i] = { ...updatedSlides[i], status: 'failed' as const };
-          }
-        } catch (err) {
-          console.error(`Failed slide ${i + 1}`, err);
-          updatedSlides[i] = { ...updatedSlides[i], status: 'failed' as const };
-        }
-
-        setPresentation({ title: plan.title, slides: [...updatedSlides] });
-
-        const progressPerSlide = 70 / totalSlides;
-        setGenerationProgress(30 + ((i + 1) * progressPerSlide));
-      }
-
-      setStep(AppStep.EDITOR);
+      setGenerationProgress(100);
       setIsGenerating(false);
+      setStep(AppStep.PLANNING_REVIEW);
 
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Generation failed", error);
 
       let msg = "Failed to generate presentation. Please try again.";
-      if (error.message?.includes('location') || error.status === 400) {
+      const err = error as { message?: string; status?: number };
+      if (err.message?.includes('location') || err.status === 400) {
         msg = uiLanguage === 'en'
           ? "API Error: User location is not supported for this model."
           : "API 错误：您所在的地区不支持此模型。";

@@ -46,7 +46,16 @@ export const translations = {
     designing: "Designing Slide...",
     fileUploaded: "File uploaded:",
     removeFile: "Remove",
-    analyzingDoc: "Analyzing document..."
+    analyzingDoc: "Analyzing document...",
+    reviewTitle: "Review Presentation Plan",
+    reviewSubtitle: "Review and modify the outline before generating slides.",
+    confirmAndGenerate: "Confirm & Generate Slides",
+    backToConfig: "Back to Settings",
+    addSlide: "Add Slide",
+    removeSlide: "Remove",
+    slideTitle: "Slide Title",
+    bulletPoints: "Bullet Points",
+    visualDesc: "Visual Description"
   },
   zh: {
     appTitle: "PPTMaker AI",
@@ -93,6 +102,15 @@ export const translations = {
     designing: "正在设计页面...",
     fileUploaded: "已上传文件：",
     removeFile: "移除",
-    analyzingDoc: "正在分析文档..."
+    analyzingDoc: "正在分析文档...",
+    reviewTitle: "审查演示大纲",
+    reviewSubtitle: "在生成幻灯片之前审查并修改大纲。",
+    confirmAndGenerate: "确认并生成幻灯片",
+    backToConfig: "返回设置",
+    addSlide: "添加页面",
+    removeSlide: "移除",
+    slideTitle: "页面标题",
+    bulletPoints: "要点内容",
+    visualDesc: "画面描述"
   }
 };

@@ -60,7 +60,7 @@ export const ApiKeyModal: React.FC<Props> = ({ onKeyConfigured }) => {
       } else {
         setError(data.error || 'Invalid API key');
       }
-    } catch (err) {
+    } catch {
       setError('Failed to validate API key');
     } finally {
       setSubmitting(false);

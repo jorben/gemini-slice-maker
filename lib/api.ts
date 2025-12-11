@@ -16,7 +16,7 @@ export function getApiHeaders(): HeadersInit {
   return headers;
 }
 
-export async function apiRequest(action: string, payload: any) {
+export async function apiRequest(action: string, payload: Record<string, unknown>) {
   const response = await fetch('/api/gemini', {
     method: 'POST',
     headers: getApiHeaders(),

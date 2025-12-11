@@ -4,13 +4,13 @@ import React from 'react';
 import { FileText, ChevronRight, X, File } from 'lucide-react';
 import type { InputSource } from '@/lib/types';
 import { AppStep } from '@/lib/types';
-import type { Language } from '@/lib/translations';
+import type { Language, translations } from '@/lib/translations';
 
 interface Props {
   inputSource: InputSource;
   setInputSource: (source: InputSource) => void;
   setStep: (step: AppStep) => void;
-  t: any;
+  t: typeof translations['en'];
   uiLanguage: Language;
 }
 
