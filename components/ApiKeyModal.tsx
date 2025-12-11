@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { Key, Loader2, AlertCircle, Languages } from 'lucide-react';
+import { Key, Loader2, AlertCircle, Languages, X } from 'lucide-react';
 import { translations, Language } from '@/lib/translations';
 import { getApiConfig, saveApiConfig, isApiConfigured, VertexApiConfig, ApiProtocol } from '@/lib/api';
 
@@ -9,12 +9,21 @@ type Translation = typeof translations.en;
 
 interface Props {
   onKeyConfigured: () => void;
+  onCancel?: () => void;
   t: Translation;
   uiLanguage: Language;
   onLanguageChange: (lang: Language) => void;
+  forceEdit?: boolean;
 }
 
-export const ApiKeyModal: React.FC<Props> = ({ onKeyConfigured, t, uiLanguage, onLanguageChange }) => {
+export const ApiKeyModal: React.FC<Props> = ({ 
+  onKeyConfigured, 
+  onCancel,
+  t, 
+  uiLanguage, 
+  onLanguageChange,
+  forceEdit = false 
+}) => {
   const [checking, setChecking] = useState(true);
   const [config, setConfig] = useState<VertexApiConfig>({
     protocol: ApiProtocol.VERTEX_AI,
@@ -37,7 +46,7 @@ export const ApiKeyModal: React.FC<Props> = ({ onKeyConfigured, t, uiLanguage, o
         });
       }
       
-      if (isApiConfigured()) {
+      if (!forceEdit && isApiConfigured()) {
         onKeyConfigured();
       }
       setChecking(false);
@@ -45,7 +54,7 @@ export const ApiKeyModal: React.FC<Props> = ({ onKeyConfigured, t, uiLanguage, o
     
     checkConfig();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [forceEdit]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -103,8 +112,8 @@ export const ApiKeyModal: React.FC<Props> = ({ onKeyConfigured, t, uiLanguage, o
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 overflow-y-auto py-8">
       <div className="bg-white rounded-2xl p-8 max-w-lg w-full shadow-2xl mx-4">
-        {/* 语言切换按钮 */}
-        <div className="flex justify-end mb-4">
+        {/* 顶部按钮栏 */}
+        <div className="flex justify-end items-center gap-2 mb-4">
           <button
             onClick={() => onLanguageChange(uiLanguage === 'en' ? 'zh' : 'en')}
             className="flex items-center gap-1.5 text-sm font-medium text-slate-600 hover:text-indigo-600 transition-colors px-3 py-1.5 rounded-full hover:bg-slate-100"
@@ -112,6 +121,16 @@ export const ApiKeyModal: React.FC<Props> = ({ onKeyConfigured, t, uiLanguage, o
             <Languages className="w-4 h-4" />
             {uiLanguage === 'en' ? '中文' : 'English'}
           </button>
+          
+          {onCancel && (
+            <button
+              onClick={onCancel}
+              className="p-2 rounded-full hover:bg-slate-100 text-slate-500 hover:text-slate-800 transition-colors"
+              type="button"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          )}
         </div>
 
         <div className="text-center mb-6">

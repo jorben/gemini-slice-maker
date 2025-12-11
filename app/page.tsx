@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { Layout, Languages } from "lucide-react";
+import { Layout, Languages, Settings } from "lucide-react";
 import { AppStep } from "@/lib/types";
 import type {
   Presentation,
@@ -38,6 +38,7 @@ export default function HomePage() {
   const [, setIsGenerating] = useState(false);
   const [generationProgress, setGenerationProgress] = useState(0);
   const [streamingContent, setStreamingContent] = useState("");
+  const [showApiModal, setShowApiModal] = useState(false);
 
   const t = translations[uiLanguage];
 
@@ -70,13 +71,23 @@ export default function HomePage() {
               PPTMaker AI
             </span>
           </div>
-          <button
-            onClick={toggleLanguage}
-            className="flex items-center gap-1.5 text-sm font-medium text-slate-600 hover:text-indigo-600 transition-colors px-3 py-1.5 rounded-full hover:bg-slate-100"
-          >
-            <Languages className="w-4 h-4" />
-            {uiLanguage === "en" ? "中文" : "English"}
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setShowApiModal(true)}
+              className="flex items-center gap-1.5 text-sm font-medium text-slate-600 hover:text-indigo-600 transition-colors px-3 py-1.5 rounded-full hover:bg-slate-100"
+              title={t.configureApiKey}
+            >
+              <Settings className="w-4 h-4" />
+              <span className="hidden sm:inline">API</span>
+            </button>
+            <button
+              onClick={toggleLanguage}
+              className="flex items-center gap-1.5 text-sm font-medium text-slate-600 hover:text-indigo-600 transition-colors px-3 py-1.5 rounded-full hover:bg-slate-100"
+            >
+              <Languages className="w-4 h-4" />
+              {uiLanguage === "en" ? "中文" : "English"}
+            </button>
+          </div>
         </header>
       )}
 
@@ -138,6 +149,17 @@ export default function HomePage() {
           />
         )}
       </main>
+
+      {showApiModal && (
+        <ApiKeyModal
+          onKeyConfigured={() => setShowApiModal(false)}
+          onCancel={() => setShowApiModal(false)}
+          t={t}
+          uiLanguage={uiLanguage}
+          onLanguageChange={setUiLanguage}
+          forceEdit={true}
+        />
+      )}
 
       <style jsx global>{`
         @media print {
