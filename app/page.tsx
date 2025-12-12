@@ -42,6 +42,7 @@ export default function HomePage() {
   const [streamingContent, setStreamingContent] = useState("");
   const [showApiModal, setShowApiModal] = useState(false);
   const [showHistory, setShowHistory] = useState(false);
+  const [currentHistoryId, setCurrentHistoryId] = useState<string | null>(null);
 
   useEffect(() => {
     const savedLang = localStorage.getItem("ppt-maker-lang") as Language;
@@ -65,21 +66,47 @@ export default function HomePage() {
     setStep(AppStep.INPUT);
   };
 
-  const handleHistorySelect = (selectedPresentation: Presentation) => {
+  const handleHistorySelect = (
+    selectedPresentation: Presentation,
+    historyId: string
+  ) => {
     setPresentation(selectedPresentation);
+    setCurrentHistoryId(historyId);
     setActiveSlideIndex(0);
     setStep(AppStep.EDITOR);
     setShowHistory(false);
   };
 
-  // Save to history when entering editor step
+  // Save to history when entering editor step from generation (not from history restore)
   useEffect(() => {
-    if (step === AppStep.EDITOR && presentation) {
-      savePresentationToHistory(presentation).catch((err) =>
-        console.error("Failed to save history:", err)
-      );
+    if (step === AppStep.EDITOR && presentation && !currentHistoryId) {
+      savePresentationToHistory(presentation)
+        .then((id) => {
+          setCurrentHistoryId(id);
+        })
+        .catch((err) => console.error("Failed to save history:", err));
     }
-  }, [step, presentation]);
+  }, [step, presentation, currentHistoryId]);
+
+  // Update history when presentation changes in editor
+  useEffect(() => {
+    if (step === AppStep.EDITOR && presentation && currentHistoryId) {
+      const timeoutId = setTimeout(() => {
+        savePresentationToHistory(presentation, currentHistoryId).catch((err) =>
+          console.error("Failed to update history:", err)
+        );
+      }, 1000); // Debounce updates
+
+      return () => clearTimeout(timeoutId);
+    }
+  }, [presentation, currentHistoryId, step]);
+
+  // Reset history ID when starting new presentation
+  useEffect(() => {
+    if (step === AppStep.INPUT) {
+      setCurrentHistoryId(null);
+    }
+  }, [step]);
 
   return (
     <div className="h-screen flex flex-col">

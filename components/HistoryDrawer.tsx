@@ -9,7 +9,7 @@ type Translation = typeof translations.en;
 interface Props {
   isOpen: boolean;
   onClose: () => void;
-  onSelect: (presentation: Presentation) => void;
+  onSelect: (presentation: Presentation, historyId: string) => void;
   t: Translation;
 }
 
@@ -99,7 +99,7 @@ export const HistoryDrawer: React.FC<Props> = ({
             history.map((record) => (
               <div
                 key={record.id}
-                onClick={() => onSelect(record.presentation)}
+                onClick={() => onSelect(record.presentation, record.id)}
                 className="group relative bg-muted/50 hover:bg-muted border border-transparent hover:border-primary/20 rounded-lg p-3 cursor-pointer transition-all"
               >
                 <div className="aspect-video bg-card rounded overflow-hidden mb-3 relative border border-border">

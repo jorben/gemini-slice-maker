@@ -34,6 +34,35 @@ export const initDB = (): Promise<IDBDatabase> => {
 };
 
 export const savePresentationToHistory = async (
+  presentation: Presentation,
+  existingId?: string
+): Promise<string> => {
+  try {
+    const db = await initDB();
+    const tx = db.transaction(STORE_NAME, "readwrite");
+    const store = tx.objectStore(STORE_NAME);
+
+    const recordId = existingId || crypto.randomUUID();
+    const record: HistoryRecord = {
+      id: recordId,
+      timestamp: Date.now(),
+      presentation,
+      thumbnail: presentation.slides[0]?.imageUrl,
+    };
+
+    return new Promise((resolve, reject) => {
+      const request = existingId ? store.put(record) : store.add(record);
+      request.onsuccess = () => resolve(recordId);
+      request.onerror = () => reject("Error saving presentation");
+    });
+  } catch (error) {
+    console.error("Error saving to history:", error);
+    throw error;
+  }
+};
+
+export const updatePresentationInHistory = async (
+  id: string,
   presentation: Presentation
 ): Promise<void> => {
   try {
@@ -42,28 +71,19 @@ export const savePresentationToHistory = async (
     const store = tx.objectStore(STORE_NAME);
 
     const record: HistoryRecord = {
-      id: crypto.randomUUID(),
+      id,
       timestamp: Date.now(),
       presentation,
       thumbnail: presentation.slides[0]?.imageUrl,
     };
 
-    // Check if we already have a record for this presentation (based on title maybe? or just always new?)
-    // For now, let's just add a new record.
-    // Ideally we might want to update if it's the same session, but "History" usually implies snapshots.
-    // However, to avoid spamming history on every auto-save, we might want to be careful.
-    // But the requirement says "History record list shows...".
-    // Let's assume we save when entering the editor or manually.
-    // Actually, the requirement says "History records are saved in local storage" (now IndexedDB).
-    // Let's provide a way to save.
-
     return new Promise((resolve, reject) => {
-      const request = store.add(record);
+      const request = store.put(record);
       request.onsuccess = () => resolve();
-      request.onerror = () => reject("Error saving presentation");
+      request.onerror = () => reject("Error updating presentation");
     });
   } catch (error) {
-    console.error("Error saving to history:", error);
+    console.error("Error updating history:", error);
     throw error;
   }
 };
