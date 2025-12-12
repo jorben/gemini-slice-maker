@@ -181,12 +181,7 @@ export const ConfigStep: React.FC<Props> = ({
                 key={idx}
                 className="cursor-pointer group relative rounded-lg overflow-hidden border border-border hover:border-primary transition-all"
                 onClick={() => {
-                  const current = config.additionalPrompt || '';
-                  const toAdd = theme.prompt;
-                  if (!current.includes(toAdd)) {
-                    const newValue = current ? `${current}\n${toAdd}` : toAdd;
-                    setConfig({ ...config, additionalPrompt: newValue });
-                  }
+                  setConfig({ ...config, additionalPrompt: theme.prompt });
                 }}
               >
                 <div className="relative aspect-video w-full">
