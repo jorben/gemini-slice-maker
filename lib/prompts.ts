@@ -64,7 +64,7 @@ Return a JSON object with a 'title' for the whole deck and an array of 'slides'.
 For each slide, provide:
 1. 'title': The slide headline.
 2. 'bulletPoints': 3-5 key points (text only).
-3. 'visualDescription': A highly detailed, artistic description of how the slide should look visually.`;
+3. 'visualDescription': A highly detailed, artistic description of how the slide should look visually, Vividly interpret the plot and content through graphic elements such as infographics, layered diagrams, structural diagrams, comparison charts, storyboard frames, maps, timelines, and charts.`;
 }
 
 /**

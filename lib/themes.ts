@@ -37,6 +37,15 @@ export const THEMES: Theme[] = [
   },
   {
     name: {
+      en: "Cartoon Magical Forest",
+      zh: "卡通魔法森林",
+    },
+    prompt:
+      "Anthropomorphic animal characters wearing cute outfits, heartwarming children's picture book illustration style. Soft watercolor painting with ink outlines, hand-drawn texture. Background features a magical forest or natural setting, bright and pastel color palette, dominated by fresh greens, warm yellows, and earth tones. Whimsical atmosphere with details like small flowers, mushrooms, and plants scattered around. Soft natural lighting, high quality, a blend of Studio Ghibli vibes and Beatrix Potter style.",
+    thumbnail: "/theme/cartoon_magical_forest.png",
+  },
+  {
+    name: {
       en: "SChiikawa Style",
       zh: "吉伊卡哇",
     },
