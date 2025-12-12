@@ -124,6 +124,7 @@ export const LoadingStep: React.FC<Props> = ({ step, presentation, generationPro
 
                 {slide.status === 'completed' && slide.imageUrl && (
                   <div className="w-full rounded-lg overflow-hidden border border-border/50 shadow-sm bg-muted/50">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img 
                       src={slide.imageUrl} 
                       alt={slide.content.title} 

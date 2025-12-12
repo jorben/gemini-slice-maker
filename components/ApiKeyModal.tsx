@@ -89,7 +89,6 @@ export const ApiKeyModal: React.FC<Props> = ({
         imageModelId: "",
       });
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [config.protocol, isInitialized]);
 
   const handleSubmit = async (e: React.FormEvent) => {
