@@ -171,7 +171,7 @@ export default function HomePage() {
         )}
       </main>
 
-      <footer className="py-2 text-center text-xs text-muted-foreground bg-card border-t border-border">
+      <footer className="py-2 text-center text-xs text-muted-foreground bg-card border-t border-border print:hidden">
         Powered by{" "}
         <a
           href="https://github.com/jorben/pptmaker"

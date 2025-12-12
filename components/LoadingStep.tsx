@@ -76,7 +76,7 @@ export const LoadingStep: React.FC<Props> = ({ step, presentation, generationPro
             {presentation.slides.map((slide) => (
               <div 
                 key={slide.id} 
-                className={`p-4 flex items-center gap-4 rounded-xl border transition-all duration-300 ${
+                className={`p-4 flex flex-col gap-4 rounded-xl border transition-all duration-300 ${
                   slide.status === 'generating' 
                     ? 'bg-primary/5 border-primary/20 shadow-[0_0_15px_rgba(var(--primary),0.1)]' 
                     : slide.status === 'completed' 
@@ -84,41 +84,54 @@ export const LoadingStep: React.FC<Props> = ({ step, presentation, generationPro
                       : 'bg-card/50 border-transparent opacity-60'
                 }`}
               >
-                <div className={`flex-shrink-0 w-10 h-10 flex items-center justify-center rounded-full font-bold text-sm border shadow-sm ${
-                  slide.status === 'completed' ? 'bg-success/10 border-success/30 text-success' : 
-                  slide.status === 'generating' ? 'bg-primary/10 border-primary/30 text-primary animate-pulse' :
-                  slide.status === 'failed' ? 'bg-destructive/10 border-destructive/30 text-destructive' :
-                  'bg-muted/50 border-border text-muted-foreground'
-                }`}>
-                  {slide.pageNumber}
-                </div>
-                
-                <div className="flex-1 min-w-0">
-                  <p className={`text-base font-semibold truncate mb-1 ${
-                    slide.status === 'completed' ? 'text-foreground' : 
-                    slide.status === 'generating' ? 'text-primary' : 'text-muted-foreground'
+                <div className="flex items-center gap-4 w-full">
+                  <div className={`flex-shrink-0 w-10 h-10 flex items-center justify-center rounded-full font-bold text-sm border shadow-sm ${
+                    slide.status === 'completed' ? 'bg-success/10 border-success/30 text-success' : 
+                    slide.status === 'generating' ? 'bg-primary/10 border-primary/30 text-primary animate-pulse' :
+                    slide.status === 'failed' ? 'bg-destructive/10 border-destructive/30 text-destructive' :
+                    'bg-muted/50 border-border text-muted-foreground'
                   }`}>
-                    {slide.content.title || `Slide ${slide.pageNumber}`}
-                  </p>
-                  <p className="text-xs text-muted-foreground/80 truncate font-mono">
-                    {slide.status === 'generating' ? (
-                        <span className="flex items-center gap-2">
-                             {t.designing} <span className="animate-pulse">...</span>
-                        </span>
-                    ) : slide.content.visualDescription}
-                  </p>
+                    {slide.pageNumber}
+                  </div>
+                  
+                  <div className="flex-1 min-w-0">
+                    <p className={`text-base font-semibold truncate mb-1 ${
+                      slide.status === 'completed' ? 'text-foreground' : 
+                      slide.status === 'generating' ? 'text-primary' : 'text-muted-foreground'
+                    }`}>
+                      {slide.content.title || `Slide ${slide.pageNumber}`}
+                    </p>
+                    <p className="text-xs text-muted-foreground/80 truncate font-mono">
+                      {slide.status === 'generating' ? (
+                          <span className="flex items-center gap-2">
+                              {t.designing} <span className="animate-pulse">...</span>
+                          </span>
+                      ) : slide.content.visualDescription}
+                    </p>
+                  </div>
+
+                  <div className={`flex-shrink-0 w-10 h-10 flex items-center justify-center rounded-full ${
+                      slide.status === 'generating' ? 'bg-primary/10' : 
+                      slide.status === 'completed' ? 'bg-success/10' : 
+                      'bg-transparent'
+                  }`}>
+                    {slide.status === 'pending' && <Clock className="w-5 h-5 text-muted-foreground/30" />}
+                    {slide.status === 'generating' && <Loader2 className="w-5 h-5 text-primary animate-spin" />}
+                    {slide.status === 'completed' && <CheckCircle className="w-5 h-5 text-success" />}
+                    {slide.status === 'failed' && <AlertCircle className="w-5 h-5 text-destructive" />}
+                  </div>
                 </div>
 
-                <div className={`flex-shrink-0 w-10 h-10 flex items-center justify-center rounded-full ${
-                     slide.status === 'generating' ? 'bg-primary/10' : 
-                     slide.status === 'completed' ? 'bg-success/10' : 
-                     'bg-transparent'
-                }`}>
-                  {slide.status === 'pending' && <Clock className="w-5 h-5 text-muted-foreground/30" />}
-                  {slide.status === 'generating' && <Loader2 className="w-5 h-5 text-primary animate-spin" />}
-                  {slide.status === 'completed' && <CheckCircle className="w-5 h-5 text-success" />}
-                  {slide.status === 'failed' && <AlertCircle className="w-5 h-5 text-destructive" />}
-                </div>
+                {slide.status === 'completed' && slide.imageUrl && (
+                  <div className="w-full rounded-lg overflow-hidden border border-border/50 shadow-sm bg-muted/50">
+                    <img 
+                      src={slide.imageUrl} 
+                      alt={slide.content.title} 
+                      className="w-full h-auto object-cover transition-transform duration-700 hover:scale-105"
+                      loading="lazy"
+                    />
+                  </div>
+                )}
               </div>
             ))}
         </div>

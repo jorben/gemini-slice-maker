@@ -143,8 +143,11 @@ ${additionalContext}
 Visual Instructions:
 ${slide.visualDescription}
 
-Important:
+IMPORTANT TEXT RENDERING RULES:
+- DO NOT include labels such as "Presentation Title", "Slide Title", or "Bullet Points".
+
+DESIGN REQUIREMENTS:
 - Create a high-quality slide design.
-- Ensure the layout has clear space for text overlay.
-- Aspect Ratio 16:9.`;
+- Aspect Ratio 16:9.
+- Ensure the layout has clear space for text overlay later.`;
 }

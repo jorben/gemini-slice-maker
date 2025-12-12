@@ -196,6 +196,15 @@ export const PlanningReviewStep: React.FC<Props> = ({
         >
             <Plus className="w-5 h-5" /> {t.addSlide}
         </button>
+
+        <div className="flex justify-center mt-8">
+          <button
+            onClick={startImageGeneration}
+            className="bg-primary hover:bg-primary/90 text-primary-foreground font-semibold py-3 px-8 rounded-lg transition-all shadow-md hover:shadow-lg flex items-center gap-2"
+          >
+            <Play className="w-4 h-4" /> {t.confirmAndGenerate}
+          </button>
+        </div>
       </div>
     </div>
   );
